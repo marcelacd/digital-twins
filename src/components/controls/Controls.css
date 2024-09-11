@@ -1,0 +1,100 @@
+.controls-header {
+  height: 5rem;
+  width: 100%;
+  background-color: #2da18e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.813);
+  gap: 10px;
+}
+
+.accordion-box {
+  background-color: hsla(0, 0%, 100%, 0) !important;
+  box-shadow: 1px 1px;
+}
+
+.accordion-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1rem;
+}
+
+.accordion-summary {
+  font-size: 1.5rem;
+  height: 3rem;
+}
+
+.accordion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-left: 1rem;
+}
+
+.transport-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkbox-column {
+  display: flex;
+  flex-direction: column;
+}
+
+::-webkit-scrollbar {
+  width: 1rem;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.alert {
+  cursor: pointer;
+}
+
+.clasificación-title-container {
+  display: flex;
+  justify-content: center;
+}
+
+.clasificación-title {
+  margin: 0 !important;
+}
+
+.clasificacion {
+  display: flex;
+  flex-direction: column;
+}
+
+.clasification-row {
+  width: 100%;
+  display: flex;
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+
+.img-logo {
+  width: 40px;
+  /* height: 100px; */
+}
+
+.content-logo {
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+  gap: 2rem;
+  padding: 15px;
+}

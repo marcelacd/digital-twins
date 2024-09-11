@@ -1,0 +1,171 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto", sans-serif;
+  background-color: #f5f5f5;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app>* {
+  margin: 0;
+}
+
+.insights-header {
+  padding: 15px;
+  background: #1976d2;
+  color: #e8edf2;
+}
+
+.insights-header-name {
+  font-size: 30px;
+}
+
+.viewer-container {
+  width: 500px;
+  position: relative;
+}
+
+.controls {
+  position: absolute;
+  left: 0;
+  z-index: 99;
+  width: 25%;
+  height: 100%;
+  background: hsla(0, 0%, 100%, 0.705);
+  box-shadow: 10px 0 5px -2px #88888817;
+  backdrop-filter: blur(6px);
+}
+
+.titles {
+  width: 70%;
+}
+
+.box-data {
+  display: flex;
+}
+
+.blink {
+  animation: blinkingError 1s infinite;
+}
+
+.insights-list {
+  padding: 10px;
+  border-top: 1px solid #d2d2d2;
+  margin-top: 10px;
+}
+
+.tooltip {
+  position: absolute;
+  border: 1px dotted #bdbdbd;
+  background-color: #eeececf2;
+  z-index: 99;
+  width: 250px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.camera-icons svg {
+  padding: 5px;
+}
+
+.camera-name {
+  font-size: 20px;
+}
+
+.sensor-name {
+  font-size: 20px;
+}
+
+.sensor-alerts {
+  text-align: center;
+  margin: 10px;
+  color: red;
+  border: 1px solid red;
+  cursor: pointer;
+}
+
+.congestion-alert {
+  text-align: center;
+  display: block;
+  color: red;
+}
+
+.tweet-content {
+  font-size: 15px;
+  padding-left: 15px;
+  border-left: 2px solid #9d9898;
+  margin: 5px 0;
+}
+
+.tweet-alerts {
+  text-align: center;
+  color: red;
+  border: 1px solid;
+}
+
+.camera-loc {
+  font-size: 13px;
+  margin: 0;
+  color: gray;
+}
+
+.tweet-date {
+  font-size: 15px;
+  color: gray;
+}
+
+.tweet-user {
+  font-size: 21px;
+}
+
+.warning-header {
+  background: #e17a1d;
+  padding: 5px;
+  color: #fdf9f8;
+}
+
+.alerts-header {
+  background: #e11d1d;
+  padding: 5px;
+  color: #fdf9f8;
+}
+
+.summary {
+  position: fixed;
+  z-index: 999;
+  width: 25%;
+  left: 50%;
+  backdrop-filter: blur(6px);
+  color: white;
+  font-weight: lighter;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+@keyframes blinkingError {
+  0% {
+    color: #d32f2f;
+  }
+
+  50% {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  100% {
+    color: #d32f2f;
+  }
+}
+
+#cesiumContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.iframe {
+  border: 0;
+}
