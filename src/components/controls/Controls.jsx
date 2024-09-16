@@ -1,34 +1,86 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
 import "./Controls.css"
-import RecyclingIcon from '@mui/icons-material/Recycling';
-import AcUnitIcon from '@mui/icons-material/AcUnit';
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+
+import Box from '@mui/material/Box';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import logoNutresa from "../../assets/logo-nutresa.png"
-import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import EqualizerIcon from '@mui/icons-material/Equalizer';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
+import Grid from '@mui/material/Unstable_Grid2';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ScaleIcon from '@mui/icons-material/Scale';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
+import { city } from './data.ts';
+import InputSelect from '../input/InputSelect.jsx'
+
+const currencies = [
+    {
+        id: 'MD',
+        label: 'Medellin',
+    },
+    {
+        id: 'BG',
+        label: 'Bogota',
+    },
+]
+
+const zones = [
+    {
+        name: 'Zona 1',
+        totalUnidades: 11347,
+        totalKg: 5400,
+        totalPesos: 39745543,
+        efectividad: 98,
+        proRef: '12,6'
+    },
+    {
+        name: 'Zona 2',
+        totalUnidades: 11347,
+        totalKg: 5400,
+        totalPesos: 39745543,
+        efectividad: 98,
+        proRef: '12,6'
+    },
+    {
+        name: 'Zona 3',
+        totalUnidades: 11347,
+        totalKg: 5400,
+        totalPesos: 39745543,
+        efectividad: 98,
+        proRef: '12,6'
+    }
+]
 
 function Controls(props) {
+    const [expanded, setExpanded] = React.useState(false);
+    const [ciudad, setCiudad] = React.useState('BG');
 
-    function handleCheckbox(event) {
-        console.log(event)
+    const handleChangeExpanded = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    }
+
+    const handleChangeSelect = (event) => {
+        setCiudad(event.target.value);
+
+        props.sendMessageToIframe({
+            codeCity: event.target.value,
+            value: city[event.target.value]
+        })
+    }
+
+    const handleCheckbox = (event) => {
         if (event.target.checked) {
             props.sendMessageToIframe({
                 type: event.target.id || event.target.checked,
                 value: {}
             })
         } else {
-            console.log('dele')
             props.sendMessageToIframe({
                 type: 'delete',
                 value: event.target.id
@@ -37,172 +89,129 @@ function Controls(props) {
     }
 
     return (
-        <Box sx={{ flexGrow: 1, height: "100%", overflow: 'auto' }} >
+        <Box className="container-box">
             <div className="controls-header">
-                <h2 style={{ margin: '0' }}>Nutresa - Digital Twin</h2>
+                <h2>Nutresa - Digital Twin</h2>
             </div>
 
-            {/* <div className='content-logo'>
-                <img className='img-logo' src={logoNutresa} alt="nutresa" />
-                <h4 style={{ margin: 0 }}>Navegar en las zonas</h4>
-            </div>
-            <hr /> */}
+            <InputSelect currencies={currencies} handleChangeSelect={handleChangeSelect}></InputSelect>
 
-            <div style={{ margin: '20px' }}>
-                <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='navZona1' />} label="Zona 1" />
-                <FormControlLabel control={<Switch onChange={handleCheckbox} id='clientes1' />} label="Clientes" />
-                {/* <VisibilityOffIcon
-                fontSize='large'
-                color='success'
-                onClick={() => handleCheckbox({ target: { checked: 'clientes1' } })}
-                style={{ cursor: 'pointer' }}
-            />
-            <VisibilityIcon
-                fontSize='large'
-                color='success'
-                onClick={() => handleCheckbox({ target: { checkedd: 'clientes1' } })}
-                style={{ cursor: 'pointer' }}
-            /> */}
-                <hr />
+            <Box sx={{ margin: '16px' }}>
+                <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                    {
+                        zones.map((zone, index) => (
+                            <React.Fragment key={index}>
+                                <Grid xs={6}>
+                                    <div className='btn-zone' onClick={() => handleCheckbox({ target: { checked: `zona${index + 1}` } })}>{zone.name}</div>
+                                </Grid>
+                                <Grid xs={6}>
+                                    <FormControlLabel control={<Switch onChange={handleCheckbox} id={`client${index + 1}`} size="small" />} label="Clientes" />
+                                </Grid>
+                            </React.Fragment>
+                        ))
+                    }
+                </Grid>
+            </Box>
 
-                <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='navZona2' />} label="Zona 2" />
-                <FormControlLabel control={<Switch onChange={handleCheckbox} id='clientes2' />} label="Clientes" />
-                {/* <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='clientes2' />} label="Clientes Zona 2" /> */}
-                {/* <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='clientes1' />} label="Clientes Zona 1" /> */}
-                <hr />
-            </div>
-
-            <Accordion className='accordion-box points'>
+            <Accordion className='accordion-box points' expanded={expanded === 'panel1'} onChange={handleChangeExpanded('panel1')}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
+                    aria-controls="panel1bh-content"
+                    id="panel1bh-header"
                 >
                     <div className='accordion-title'>
-                        <AcUnitIcon fontSize='large' color='success' />
-                        <h4 style={{ margin: 0 }}>Volumen de ventas</h4>
+                        <EqualizerIcon fontSize='large' color='error' />
+                        <h4 style={{ margin: 0 }}>Volumen y valor de ventas</h4>
                     </div>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <FormGroup>
-                        <div className='puntos-content'>
-                            <div className='checkbox-column'>
-                                <FormGroup>
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='billboard' />} label="Billboard" />
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='heatmap' />} label="Heatmap" />
-                                </FormGroup>
-                            </div>
-                        </div>
-                    </FormGroup>
+                    {
+                        zones.map((zone, index) => (
+                            <React.Fragment key={index}>
+                                <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                                    <Grid>
+                                        <span><strong>{zone.name}</strong></span>
+                                        <Grid container rowSpacing={0.5} columnSpacing={{ xs: 1, sm: 3, md: 4 }}>
+                                            <Grid xs={4}>
+                                                {/* <InventoryIcon sx={{fontSize: 15, color: 'blue' }} /> */}
+                                                {zone.totalUnidades + ' U'}
+                                            </Grid>
+                                            <Grid xs={4}>
+                                                {/* <ScaleIcon sx={{ fontSize: 15, color: 'blue' }} /> */}
+                                                {zone.totalKg + ' K'}
+                                            </Grid>
+                                            <Grid xs={4}>
+                                                {/* <AttachMoneyIcon sx={{ fontSize: 15, color: 'blue' }} /> */}
+                                                {'$' + zone.totalPesos}
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </React.Fragment>
+                        ))
+                    }
                 </AccordionDetails>
             </Accordion>
 
-            <Accordion className='accordion-box points'>
+            <Accordion className='accordion-box points' expanded={expanded === 'panel2'} onChange={handleChangeExpanded('panel2')}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
+                    aria-controls="panel2bh-content"
+                    id="panel2bh-header"
                 >
                     <div className='accordion-title'>
-                        <AcUnitIcon fontSize='large' color='success' />
-                        <h4 style={{ margin: 0 }}>Valor total de ventas</h4>
+                        <TrendingUpIcon fontSize='large' color='primary' />
+                        <h4 style={{ margin: 0 }}>Efectividad de ventas</h4>
                     </div>
                 </AccordionSummary>
-                {/* <AccordionDetails>
-                    <FormGroup>
-                        <div className='puntos-content'>
-                            <div className='checkbox-column'>
-                                <FormGroup>
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='navZona1' />} label="Navegar Zona 1" />
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='clientes1' />} label="Ver clientes" />
-                                </FormGroup>
-                            </div>
-                        </div>
-                    </FormGroup>
-                </AccordionDetails> */}
+                <AccordionDetails>
+                    {
+                        zones.map((zone, index) => (
+                            <React.Fragment key={index}>
+                                <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                                    <Grid xs={6}>
+                                        <span><strong>{zone.name}</strong></span>
+                                    </Grid>
+                                    <Grid xs={6}>
+                                        {zone.efectividad + '%'}
+                                    </Grid>
+                                </Grid>
+                            </React.Fragment>
+                        ))
+                    }
+                </AccordionDetails>
             </Accordion>
 
-            <Accordion className='accordion-box points'>
+            <Accordion className='accordion-box points' expanded={expanded === 'panel3'} onChange={handleChangeExpanded('panel3')}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
+                    aria-controls="panel2bh-content"
+                    id="panel2bh-header"
                 >
                     <div className='accordion-title'>
-                        <AcUnitIcon fontSize='large' color='success' />
-                        <h4 style={{ margin: 0 }}>Efectividad</h4>
-                    </div>
-                </AccordionSummary>
-                {/* <AccordionDetails>
-                    <FormGroup>
-                        <div className='puntos-content'>
-                            <div className='checkbox-column'>
-                                <FormGroup>
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='navZona1' />} label="Navegar Zona 1" />
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='clientes1' />} label="Ver clientes" />
-                                </FormGroup>
-                            </div>
-                        </div>
-                    </FormGroup>
-                </AccordionDetails> */}
-            </Accordion>
-            <Accordion className='accordion-box points'>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                >
-                    <div className='accordion-title'>
-                        <AcUnitIcon fontSize='large' color='success' />
+                        <ProductionQuantityLimitsIcon fontSize='large' color='success' />
                         <h4 style={{ margin: 0 }}>Referencias</h4>
                     </div>
                 </AccordionSummary>
-                {/* <AccordionDetails>
-                    <FormGroup>
-                        <div className='puntos-content'>
-                            <div className='checkbox-column'>
-                                <FormGroup>
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='navZona1' />} label="Navegar Zona 1" />
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='clientes1' />} label="Ver clientes" />
-                                </FormGroup>
-                            </div>
-                        </div>
-                    </FormGroup>
-                </AccordionDetails> */}
-            </Accordion>
-
-            {/* <div style={{ margin: '20px' }}>
-                <TextField id="outlined-basic" label="Número vendedores" onChange={handleCheckbox} variant="outlined" />
-            </div> */}
-
-            {/* <Accordion className='accordion-box points'>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                >
-                    <div className='accordion-title'>
-                        <LeaderboardIcon fontSize='large' color='success' />
-                        <h4 style={{ margin: 0 }}>Metricas</h4>
-                    </div>
-                </AccordionSummary>
                 <AccordionDetails>
-                    <FormGroup>
-                        <div className='puntos-content'>
-                            <div className='checkbox-column'>
-                                <FormGroup>
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='billboard' />} label="Billboard" />
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='circle' />} label="Circle" />
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='route' />} label="Route" />
-                                    <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='heatmap' />} label="Heatmap" />
-                                </FormGroup>
-                            </div>
-                        </div>
-                    </FormGroup>
+                    {
+                        zones.map((zone, index) => (
+                            <React.Fragment key={index}>
+                                <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                                    <Grid xs={6}>
+                                        <span><strong>{zone.name}</strong></span>
+                                    </Grid>
+                                    <Grid xs={6}>
+                                        {zone.proRef + ' por cliente'}
+                                    </Grid>
+                                </Grid>
+                            </React.Fragment>
+                        ))
+                    }
                 </AccordionDetails>
-            </Accordion> */}
+            </Accordion>
         </Box>
-    );
+    )
 }
 
 export default Controls;

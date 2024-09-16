@@ -14,7 +14,6 @@ function BasicBars() {
   const [fixLabel, setFixLabel] = React.useState(true);
 
   const getColorBasedOnValue = (value) => {
-    console.log(value)
     if (value > 100000000) {
       return '#FF5733'; // Rojo para valores altos
     } else if (value > 5000) {
@@ -59,7 +58,7 @@ function BasicBars() {
               context.location === 'tickk'
                 ? value.split('').join('\n')
                 : usAirportPassengers.find((item) => item.code === value).fullName,
-            // label: 'airports',
+            label: 'airports',
             labelStyle: fixLabel
               ? {
                 // Move the x-axis label with style
@@ -69,7 +68,8 @@ function BasicBars() {
           },
         ]}
         // Modify the margin
-        margin={{ top: 10, right: 5, bottom: 30, left: 100 }}
+        margin={{top: 20, right: 5, bottom: 25, left: 55 }}
+        // margin={{ top: 10, right: 5, bottom: 30, left: 10 }}
         sx={
           fixLabel
             ? {
@@ -81,24 +81,24 @@ function BasicBars() {
             : {}
         }
         // Other props
-        height={300}
+        height={230}
         dataset={usAirportPassengers}
         // color={'#fff'}
         series={[
-          {
-            dataKey: '2020',
-            label: 'Zona 1',
-            color: '#FF5733', // Color personalizado para 2020
-          },
-          {
-            dataKey: '2021',
-            label: 'Zona 2',
-            color: '#33FF57', // Color personalizado para 2021
-          },
+          // {
+          //   dataKey: '2020',
+          //   label: 'Zona 1',
+          //   color: '#FF5733', // Color personalizado para 2020
+          // },
+          // {
+          //   dataKey: '2021',
+          //   label: 'Zona 2',
+          //   color: '#33FF57', // Color personalizado para 2021
+          // },
           {
             dataKey: '2022',
             label: 'Zona 3',
-            color: '#3357FF', // Color personalizado para 2022
+            color: '#FF5733', // Color personalizado para 2022
           },
         ]}
         slotProps={{ legend: { hidden: true } }}
@@ -116,26 +116,26 @@ function BasicBars() {
 
 const usAirportPassengers = [
   {
-    fullName: 'Enero',
+    fullName: '3',
     code: 'Enero',
     2022: 45396001,
-    2021: 36676010,
-    2020: 70559866,
+    // 2021: 36676010,
+    // 2020: 70559866,
   },
   {
-    fullName: 'Febrero',
+    fullName: '4',
     code: 'Febrero',
     2022: 35345138,
-    2021: 30005266,
-    2020: 18593421,
+    // 2021: 30005266,
+    // 2020: 18593421,
   },
-  {
-    fullName: 'Marzo',
-    code: 'Marzo',
-    2022: 33773832,
-    2021: 28645527,
-    2020: 16243216,
-  },
+  // {
+  //   fullName: 'Marzo',
+  //   code: 'Marzo',
+  //   2022: 33773832,
+  //   2021: 28645527,
+  //   2020: 16243216,
+  // },
 ];
 
 export default BasicBars;
