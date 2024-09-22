@@ -8,13 +8,13 @@
   /* scrollbarWidth: 'thin'; */
 
   .controls-header {
-    height: 5rem;
+    height: 4rem;
     width: 100%;
-    background-color: #2da18e;
+    background-color: #009877;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.813);
+    color: #FFFFFF;
     gap: 10px;
 
     h2 {
@@ -23,7 +23,7 @@
   }
 
   .btn-zone {
-    background: #efefef;
+    background: #FFFFFF;
     border-radius: 6px;
     padding: 4px 10px;
     cursor: pointer;

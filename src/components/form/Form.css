@@ -1,0 +1,23 @@
+/* 
+
+.container-bo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+}
+
+.controls-header {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.content {
+    margin-top: 10px;
+}
+ */
+
+.open {
+  /* width: 20%; */
+}

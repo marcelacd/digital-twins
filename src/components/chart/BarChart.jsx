@@ -68,18 +68,18 @@ function BasicBars() {
           },
         ]}
         // Modify the margin
-        margin={{top: 20, right: 5, bottom: 25, left: 55 }}
+        margin={{top: 10, right: 5, bottom: 25, left: 55 }}
         // margin={{ top: 10, right: 5, bottom: 30, left: 10 }}
-        sx={
-          fixLabel
-            ? {
-              [`.${axisClasses.left} .${axisClasses.label}`]: {
-                // Move the y-axis label with CSS
-                transform: 'translateX(-35px)',
-              },
-            }
-            : {}
-        }
+        // sx={
+        //   fixLabel
+        //     ? {
+        //       [`.${axisClasses.left} .${axisClasses.label}`]: {
+        //         // Move the y-axis label with CSS
+        //         transform: 'translateX(-35px)',
+        //       },
+        //     }
+        //     : {}
+        // }
         // Other props
         height={230}
         dataset={usAirportPassengers}

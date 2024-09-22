@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 
-const InputSelect = ({ currencies, handleChangeSelect, defaultValue = 'BG', label = 'Ciudad' }) => {
+const InputSelect = ({ currencies, handleChangeSelect, defaultValue, label }) => {
     return (
         <Box
             component="form"

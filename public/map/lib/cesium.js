@@ -7,7 +7,7 @@ Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 var viewer;
 let globe;
 
-let data1 = {}
+let dataCity = {}
 
 
 // Oyente del padre
@@ -19,7 +19,7 @@ window.addEventListener('message', (event) => {
     // addHeatMap(heatMapData.extent, heatMapData.data, 100, 'heatmap')
 
     if (data.codeCity && data.value) {
-        data1 = data.value
+        dataCity = data.value
 
         removeEntities('zona')
         flyToLocation(
@@ -38,7 +38,7 @@ window.addEventListener('message', (event) => {
     }
 
     if (data.type && data.value) {
-        data1.zone.forEach(zone => {
+        dataCity.zone.forEach(zone => {
             if (zone.code === data.type) {
                 flyToLocation(
                     zone.flyLocation.lon,
@@ -138,6 +138,7 @@ try {
     tooltip.style.borderRadius = '20%';
     tooltip.style.fontWeight = '600'
 
+
     let handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     // Controlador de la acción de clic izquierdo
     handler.setInputAction(function (click) {
@@ -147,7 +148,7 @@ try {
 
         if (pickedObject && pickedObject.id && pickedObject?.id?.idname) {
             console.log(pickedObject.id)
-            sendMessageToParent({ type: 'zonaSelected', value: pickedObject.id.idname });
+            sendMessageToParent({ type: 'selectedZona', value: pickedObject.id.idname });
         }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
@@ -232,7 +233,7 @@ const flyCamera = () => {
 
 // Volar a un lugar determinado
 const flyToLocation = (lon, lat, height, heading, pitch, name, duration = 0) => {
-    console.log(data1)
+    console.log(dataCity)
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(lon, lat, height),
         duration: duration,
@@ -248,19 +249,20 @@ const flyToLocation = (lon, lat, height, heading, pitch, name, duration = 0) => 
 
 let colors = [
     {
-        color: Cesium.Color.ORANGE
+        color: Cesium.Color.fromCssColorString('#F9B242')
     },
     {
-        color: Cesium.Color.PURPLE
+        color: Cesium.Color.fromCssColorString('#3BB6A7')
     },
     {
-        color: Cesium.Color.RED
+        color: Cesium.Color.fromCssColorString('#CDDE00')
     }
 ]
 
 // Añadir polígonos para cada zona
 const addPolygon = () => {
-    data1.zone.forEach((zone, index) => {
+    console.log(dataCity)
+    dataCity.zone.forEach((zone, index) => {
         // Convertir las coordenadas de latitud y longitud a Cesium.Cartesian3
         const positions = zone.coordinate.map(function (coord) {
             return Cesium.Cartesian3.fromDegrees(coord[1], coord[0]);
@@ -268,13 +270,13 @@ const addPolygon = () => {
 
         // Agregar la nueva entidad y almacenar la referencia
         const entity = viewer.entities.add({
-            name: 'zona',
+            name: zone.code,
             polygon: {
                 hierarchy: new Cesium.PolygonHierarchy(positions),
                 outline: false,
                 // outlineColor: zone.color, // Cambia el color del contorno aquí
                 // outlineWidth: 2, // Ancho del contorno
-                material: colors[index].color.withAlpha(0.5),
+                material: colors[index].color.withAlpha(0.7),
                 heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                 extrudedHeight: zone.height,
                 disableDepthTestDistance: Number.POSITIVE_INFINITY

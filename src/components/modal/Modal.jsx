@@ -1,296 +1,548 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Modal.css';
 
-import BasicBars from '../chart/BarChart'
+import { MixedBarChart } from '../chart/MixedBarChart'
 import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
+import CloseIcon from '@mui/icons-material/Close';
 
-function Modal({ isOpen, onClose }) {
-    const [selectedTab, setSelectedTab] = React.useState('tab1');
-    const [selectedSubTab, setSelectedSubTab] = React.useState('subTab1');
-    const [vendedores, setVendedores] = React.useState();
+import { executeAthenaQuery } from '../../services/athenaService.js';
+
+
+function Modal({ isOpen, onClose, selectedZona }) {
+    const [selectedTab, setSelectedTab] = useState('tab1');
+    const [vendedores, setVendedores] = useState()
+    const [loading, setloading] = useState(true)
+
+    const [ventaVolumenes, setVentaVolumenes] = useState({})
+    const [volumenesChart, setVolumenesChart] = useState({})
+    const [ejecucionPresupuestal, setEjecucionPresupuestal] = useState({})
+    const [ejecucionPresupuestalChart, setEjecucionPresupuestalChart] = useState({})
+    const [referencias, setReferencias] = useState({})
+    const [referenciasChart, setReferenciasChart] = useState({})
+
+    const [efectividadVentas, setEfectividadVentas] = useState({})
+    const [efectividadVentasChart, setEfectividadVentasChart] = useState({})
+
+    const handleTitleClickTab = (title) => {
+        setSelectedTab(title);
+    }
+
+
+    function transformarDataVolumenes(data) {
+        const headers = data[0]
+
+        // Convertir los datos en objetos
+        const resultado = data.slice(1).map(row => {
+            return headers.reduce((obj, header, index) => {
+                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
+                return obj
+            }, {})
+        })
+        setVentaVolumenes(resultado[0])
+    }
+    function transformarDataVolumenesChart(data) {
+        const monthOrder = {
+            'ENE': 1, 'FEB': 2, 'MAR': 3, 'ABR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AGO': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DIC': 12
+        }
+
+        const headers = data[0]
+
+        // Convertir los datos en objetos
+        const resultado = data.slice(1).map(row => {
+            return headers.reduce((obj, header, index) => {
+                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index]);
+                return obj
+            }, {})
+        })
+
+        // Ordenar los objetos basados en el orden de los meses
+        const sortedResultado = resultado.sort((a, b) => {
+            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0);
+        })
+        const organizedData = {
+            labels: sortedResultado.map(item => item.mes),
+            total_venta_neta_acum_eco: sortedResultado.map(item => item.total_venta_neta_acum_eco),
+            total_venta_neta_acum_kg: sortedResultado.map(item => item.total_venta_neta_acum_kg),
+            total_venta_neta_acum_un: sortedResultado.map(item => item.total_venta_neta_acum_un),
+        }
+        setVolumenesChart(organizedData)
+    }
+
+    function transformarDataEjePresupuestal(data) {
+        const headers = data[0]
+
+        // Convertir los datos en objetos
+        const resultado = data.slice(1).map(row => {
+            return headers.reduce((obj, header, index) => {
+                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
+                return obj
+            }, {})
+        })
+        setEjecucionPresupuestal(resultado[0])
+    }
+    function transformarDataEjePresupuestalChart(data) {
+        const monthOrder = {
+            'ENE': 1, 'FEB': 2, 'MAR': 3, 'ABR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AGO': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DIC': 12
+        }
+
+        const headers = data[0]
+
+        // Convertir los datos en objetos
+        const resultado = data.slice(1).map(row => {
+            return headers.reduce((obj, header, index) => {
+                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index]);
+                return obj;
+            }, {});
+        });
+
+        // Ordenar los objetos basados en el orden de los meses
+        const sortedResultado = resultado.sort((a, b) => {
+            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0);
+        })
+        const organizedData = {
+            labels: sortedResultado.map(item => item.mes),
+            data: sortedResultado.map(item => item.ejecucion_presupuestal.toFixed(2)),
+        }
+        setEjecucionPresupuestalChart(organizedData)
+    }
+
+    function transformarDataReferencias(data) {
+        const headers = data[0]
+
+        // Convertir los datos en objetos
+        const resultado = data.slice(1).map(row => {
+            return headers.reduce((obj, header, index) => {
+                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
+                return obj
+            }, {})
+        })
+        setReferencias(resultado[0])
+    }
+    function transformarDataReferenciasChart(data) {
+        const monthOrder = {
+            'ENE': 1, 'FEB': 2, 'MAR': 3, 'ABR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AGO': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DIC': 12
+        }
+
+        // Referencias
+        const headers = data[0]
+        // Convertir los datos en objetos
+        const referenciasChart = data.slice(1).map(row => {
+            return headers.reduce((obj, header, index) => {
+                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index]);
+                return obj
+            }, {})
+        });
+        // Ordenar los objetos basados en el orden de los meses
+        const sortedResultado = referenciasChart.sort((a, b) => {
+            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0);
+        })
+
+        const organizedDataReferencias = {
+            labels: sortedResultado.map(item => item.mes),
+            data: sortedResultado.map(item => item.referencias_total),
+        }
+        setReferenciasChart(organizedDataReferencias)
+    }
+
+    function transformarDataVentasPlanEfec(vPlaneadas, vEfectivas) {
+        const ventasPlaneadas = parseFloat(vPlaneadas[1][1])
+        const ventasEfectivas = parseFloat(vEfectivas[1][1])
+
+        const organizedData = {
+            ventas_planeadas: ventasPlaneadas,
+            ventas_efectivas: ventasEfectivas,
+            ventas_no_efectivas: ventasPlaneadas - ventasEfectivas
+        }
+
+        setEfectividadVentas(organizedData)
+    }
+
+    function transformarDataVentasPlanEfecChart(vPlaneadas, vEfectivas) {
+        const monthOrder = {
+            'ENE': 1, 'FEB': 2, 'MAR': 3, 'ABR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AGO': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DIC': 12
+        }
+        const ajusteMeses = { Abril: 'ABR', Mayo: 'MAY', Junio: 'JUN' }
+
+        const headersPlan = vPlaneadas[0]
+        // Convertir los datos en objetos
+
+        const resultadoPlan = vPlaneadas.slice(1).map(row => {
+            return headersPlan.reduce((obj, header, index) => {
+                if (header === 'mes') {
+                    obj[header] = ajusteMeses[row[index]] || row[index];
+                } else {
+                    // Convertir a número si no es el mes
+                    obj[header] = parseFloat(row[index]);
+                }
+                return obj;
+            }, {});
+        })
+        // const resultadoPlan = vPlaneadas.slice(1).map(row => {
+        //     return headersPlan.reduce((obj, header, index) => {
+        //         obj[header] = header === 'mes' ? row[index] : parseFloat(row[index])
+        //         return obj
+        //     }, {})
+        // })
+
+        const headersEfe = vEfectivas[0]
+        // Convertir los datos en objetos
+        const resultadoEfe = vEfectivas.slice(1).map(row => {
+            return headersEfe.reduce((obj, header, index) => {
+                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index])
+                return obj
+            }, {})
+        })
+
+        //Sacar el promedio de efectividad
+        const efectividadVentas = resultadoPlan.map(resPlan => {
+            const resEfe = resultadoEfe.find(r => r.mes === resPlan.mes);
+            if (resEfe) {
+                return {
+                    mes: resPlan.mes,
+                    efectividad: (resEfe.ventas_efectivas_mensual / resPlan.ventas_planeadas_mensual) * 100
+                }
+            }
+            return null;
+        }).filter(item => item !== null)
+
+        // Ordenar los objetos basados en el orden de los meses
+        const sortedResultado = efectividadVentas.sort((a, b) => {
+            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0)
+        })
+
+        const organizedData = {
+            labels: sortedResultado.map(item => item.mes),
+            data: sortedResultado.map(item => item.efectividad),
+        }
+        setEfectividadVentasChart(organizedData)
+    }
+
+
+    // Ejecuta la query cuando se abre el modal o cambia el tab seleccionado
+    useEffect(() => {
+        const fetchQueryResults = async () => {
+            try {
+
+                //Volumenes
+                const queryVolumenes = `SELECT zona, 
+                                        SUM(venta_neta_acum_ano_actual_kg) AS ventas_kg,
+                                        SUM(venta_neta_acum_ano_actual_un) AS ventas_un, 
+                                        SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco
+                                        FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN ('JUN') AND zona = '${selectedZona}' GROUP BY zona`
+                const queryVolumenesChart = `SELECT mes,  
+                                        SUM(venta_neta_acum_ano_actual_eco) AS total_venta_neta_acum_eco,
+                                        SUM(venta_neta_acum_ano_actual_kg) AS total_venta_neta_acum_kg,
+                                        SUM(venta_neta_acum_ano_actual_un) AS total_venta_neta_acum_un
+                                        FROM "digital-twins-nutresa-glue-db"."ventas" WHERE zona = '${selectedZona}' GROUP BY mes`;
+
+                //Ejecucion presupuestal
+                const queryEjePresupuestal = `SELECT zona, SUM(ppto_neta_acum_ano_actual_eco) AS ppto, SUM(venta_neta_acum_ano_actual_eco) AS ventas
+                                              FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN ('JUN') AND zona = '${selectedZona}' GROUP BY zona;`
+                const queryEjePresupuestalChart = `SELECT mes, (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
+                                                   FROM "digital-twins-nutresa-glue-db"."ventas" WHERE zona = '${selectedZona}' GROUP BY mes`;
+
+                //Referencias
+                //Me falta query que me traiga el total de referencias unicas por zona y por mes o meses
+                //Me falta query que me traiga el total de clientes por zona y por mes o meses
+                const queryReferencias = `SELECT zona, SUM(conteo_referencias) AS referencias_total
+                                            FROM (SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
+                                            FROM (SELECT DISTINCT mes, zona, descripcion_material, nombre_comercial, vendedor_ecom
+                                            FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas" WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
+                                            GROUP BY mes, zona, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor
+                                            WHERE mes IN ('JUN') AND zona = '${selectedZona}' GROUP BY zona;`
+
+                const queryReferenciasChart = `SELECT mes, AVG(conteo_referencias) AS referencias_total
+                                           FROM(SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
+                                           FROM(SELECT DISTINCT mes, zona, descripcion_material, nombre_comercial, vendedor_ecom
+                                           FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
+                                           WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
+                                           GROUP BY mes, zona, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor
+                                               WHERE zona = '${selectedZona}' GROUP BY mes`
+
+                //Efectividad
+                const queryVentasPlaneadas = `SELECT zona, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
+                                              FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"
+                                              WHERE zona = '${selectedZona}' AND mes IN ('Junio') GROUP BY zona`
+
+                const queryVentasEfectivas = `SELECT zona, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
+                                                SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
+                                                FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
+                                                FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
+                                                WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
+                                                WHERE zona = '${selectedZona}' AND mes IN ('JUN') GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY zona`
+
+                const queryVentasPlaneadasChart = `SELECT mes, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
+                                              FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"
+                                              WHERE zona = '${selectedZona}' GROUP BY mes`
+
+                const queryVentasEfectivasChart = `SELECT mes, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
+                                                SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
+                                                FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
+                                                FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
+                                                WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
+                                                WHERE zona = '${selectedZona}' GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY mes`
+
+                const [
+                    respuestaVolumenes,
+                    respuestaVolumenChart,
+                    respuestaEjePresupuestal,
+                    respuestaEjePresupuestalChart,
+                    respuestaReferencias,
+                    respuestaReferenciasChart,
+
+                    respuestaVentasPlaneadas,
+                    respuestaVentasEfectivas,
+                    respuestaVentasPlaneadasChart,
+                    respuestaVentasEfectivasChart,
+                ] = await Promise.all([
+                    executeAthenaQuery(queryVolumenes),
+                    executeAthenaQuery(queryVolumenesChart),
+                    executeAthenaQuery(queryEjePresupuestal),
+                    executeAthenaQuery(queryEjePresupuestalChart),
+                    executeAthenaQuery(queryReferencias),
+                    executeAthenaQuery(queryReferenciasChart),
+
+                    executeAthenaQuery(queryVentasPlaneadas),
+                    executeAthenaQuery(queryVentasEfectivas),
+                    executeAthenaQuery(queryVentasPlaneadasChart),
+                    executeAthenaQuery(queryVentasEfectivasChart),
+                ])
+
+                transformarDataVolumenes(respuestaVolumenes)
+                transformarDataVolumenesChart(respuestaVolumenChart)
+                transformarDataEjePresupuestal(respuestaEjePresupuestal)
+                transformarDataEjePresupuestalChart(respuestaEjePresupuestalChart)
+                transformarDataReferencias(respuestaReferencias)
+                transformarDataReferenciasChart(respuestaReferenciasChart)
+
+                transformarDataVentasPlanEfec(respuestaVentasPlaneadas, respuestaVentasEfectivas)
+                transformarDataVentasPlanEfecChart(respuestaVentasPlaneadasChart, respuestaVentasEfectivasChart)
+                setloading(false)
+
+            } catch (error) {
+                onClose()
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Solo ejecuta la query si el modal está abierto
+        if (isOpen) {
+            fetchQueryResults();
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
-    // Función para manejar el clic en un título
-    const handleTitleClickTab = (title) => {
-        setSelectedTab(title);
-    };
-
-    const handleTitleClickSubTab = (title) => {
-        setSelectedSubTab(title);
-    };
-
-    // Función para manejar el cambio del input
-    const handleInputChange = (event) => {
-        console.log(event)
-        setVendedores(event.target.value);
-    };
-
-    // Función para manejar el clic del botón
-    const handleButtonClick = () => {
-        console.log(vendedores)
-        // Aquí puedes enviar el valor capturado (vendedores) a una API o manejarlo como necesites
-    };
-
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
+        <div className="modal-overlay" style={{ position: 'absolute' }}>
+            {loading ? (
+                <span className="loader"></span>
+            ) : (
+                <div className="modal-content">
 
-                <Grid container className="title">
-                    <Grid xs={6}>
-                        <h2
-                            onClick={() => handleTitleClickTab('tab1')}
-                            className={selectedTab === 'tab1' ? 'color-tab' : ''}
+                    <div style={{ position: 'relative' }}>
+                        <CloseIcon fontSize='small'
+                            onClick={onClose}
+                            style={{
+                                position: 'absolute',
+                                right: '0px',
+                                top: '-3px',
+                                cursor: 'pointer'
+                            }}
                         >
-                            <span className='pointer'>Información descriptiva</span>
-                        </h2>
-                    </Grid>
-                    <Grid xs={6}>
-                        <h2
-                            onClick={() => handleTitleClickTab('tab2')}
-                            className={selectedTab === 'tab2' ? 'color-tab' : ''}>
-                            <span className='pointer' >Simulación</span>
-                        </h2>
-                    </Grid>
-                </Grid>
+                            {/* &times; */}
+                        </CloseIcon>
+                    </div>
 
-                <div className="container">
-                    {/* Simulación */}
-                    {selectedTab === 'tab2' && (
-                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }} sx={{ margin: '20px 0' }}>
-                            <Grid xs={10} sm={10} md={5}>
-                                <Box
-                                    component="form"
-                                    sx={{
-                                        '& .MuiTextField-root': { width: '100%' },
-                                    }}
-                                    noValidate
-                                    autoComplete="off"
-                                >
-                                    <TextField
-                                        id="outlined-multiline-flexible"
-                                        label="Ingrese el numero de vendedores"
-                                        multiline
-                                        maxRows={4}
-                                        size="small"
-                                        type="number"
-                                        value={vendedores}
-                                        onChange={handleInputChange}
-                                    />
-                                </Box>
+                    <Box sx={{ textAlign: 'center' }}>
+                        <h2>Indicadores zona {selectedZona}</h2>
+                    </Box>
+
+                    <div className="container">
+                        <Grid container className="tabs">
+                            <Grid xs={3}>
+                                <div
+                                    onClick={() => handleTitleClickTab('tab1')}
+                                    className={selectedTab === 'tab1' ? 'color-tab' : ''}>
+                                    <span className='pointer'>Volumen y valor de ventas</span>
+                                </div>
                             </Grid>
-                            <Grid xs={2} sx={{ display: 'flex' }}>
-                                <Button sx={{ textTransform: 'none' }} variant="contained" onClick={handleButtonClick}>Simular</Button>
+                            <Grid xs={3}>
+                                <div
+                                    onClick={() => handleTitleClickTab('tab2')}
+                                    className={selectedTab === 'tab2' ? 'color-tab' : ''}>
+                                    <span className='pointer'>Efectividad</span>
+                                </div>
+                            </Grid>
+                            <Grid xs={3}>
+                                <div
+                                    onClick={() => handleTitleClickTab('tab3')}
+                                    className={selectedTab === 'tab3' ? 'color-tab' : ''}>
+                                    <span className='pointer'>Referencias</span>
+                                </div>
+                            </Grid>
+                            <Grid xs={3}>
+                                <div
+                                    onClick={() => handleTitleClickTab('tab4')}
+                                    className={selectedTab === 'tab4' ? 'color-tab' : ''}>
+                                    <span className='pointer'>Ejecución presupuestal</span>
+                                </div>
                             </Grid>
                         </Grid>
-                    )}
+                        <div style={{ marginBottom: '10px' }}>Datos a mes de junio</div>
 
-                    {/* Ambos */}
-                    <Grid container className="subtitle">
-                        <Grid xs={4}>
-                            <div
-                                onClick={() => handleTitleClickSubTab('subTab1')}
-                                className={selectedSubTab === 'subTab1' ? 'color-tab' : ''}>
-                                <span className='pointer'>Volumen y valor de ventas</span>
-                            </div>
-                        </Grid>
-                        <Grid xs={4}>
-                            <div
-                                onClick={() => handleTitleClickSubTab('subTab2')}
-                                className={selectedSubTab === 'subTab2' ? 'color-tab' : ''}>
-                                <span className='pointer'>Efectividad</span>
-                            </div>
-                        </Grid>
-                        <Grid xs={4}>
-                            <div
-                                onClick={() => handleTitleClickSubTab('subTab3')}
-                                className={selectedSubTab === 'subTab3' ? 'color-tab' : ''}>
-                                <span className='pointer'>Referencias</span>
-                            </div>
-                        </Grid>
-                    </Grid>
-
-                    {/* Información */}
-                    {selectedTab === 'tab1' && (
-                        <>
-                            {selectedSubTab === 'subTab1' && (
-                                <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
+                        {selectedTab === 'tab1' && (
+                            <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
+                                <>
+                                    <div></div>
                                     <Grid xs={4}>
                                         <div className='cart'>
                                             <h4 style={{ margin: '0' }}>Unidades</h4>
-                                            <div>
-                                                9.650
-                                            </div>
+                                            <div style={{ fontSize: '18px' }}>{ventaVolumenes.ventas_un.toLocaleString('es-ES') + ' U'}</div>
                                         </div>
                                     </Grid>
                                     <Grid xs={4}>
                                         <div className='cart'>
                                             <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                            <div>
-                                                9.650
-                                            </div>
+                                            <div style={{ fontSize: '18px' }}>{ventaVolumenes.ventas_kg.toLocaleString('es-ES') + ' Kg'}</div>
                                         </div>
                                     </Grid>
                                     <Grid xs={4}>
                                         <div className='cart'>
                                             <h4 style={{ margin: '0' }}>Pesos</h4>
-                                            <div>
-                                                $28.245.230
-                                            </div>
+                                            <div style={{ fontSize: '18px' }}>{'$' + ventaVolumenes.ventas_eco.toLocaleString('es-ES')}</div>
                                         </div>
                                     </Grid>
-
-                                    <Grid xs={6}>
-                                        <div style={{ backgroundColor: '#CBF0EA', color: 'white', padding: '10px', borderRadius: '6px' }}>
-                                            <h4 style={{ margin: '0' }}>Ventas por mes</h4>
-                                            <div>
-                                                Mayo
-                                            </div>
-                                            <div>
-                                                Junio
-                                            </div>
-                                            <div>
-                                                Julio
-                                            </div>
-                                        </div>
-                                    </Grid>
-                                    <Grid xs={6}>
-                                        <div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '6px' }}>
-                                            <div>
-                                                9.650
-                                            </div>
-                                        </div>
-                                    </Grid>
-                                </Grid>
-                            )
-                            }
-
-                            {selectedSubTab === 'subTab2' && (
-                                <div>
-                                    Nada
-                                </div>
-                            )
-                            }
-                            {selectedSubTab === 'subTab3' && (
-                                <div>
-                                    Nada
-                                </div>
-                            )
-                            }
-                        </>
-                    )}
-
-                    {/* Simulación */}
-                    {selectedTab === 'tab2' && (
-                        <>
-                            {selectedSubTab === 'subTab1' && (
-                                <Box sx={{ width: '100%' }}>
-                                    <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
-                                        <Grid xs={4}>
-                                            <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                                <h4 style={{ margin: '0' }}>Unidades</h4>
-                                                <BasicBars />
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <span>Numero de vendedores</span>
-                                                </div>
-                                            </div>
-                                        </Grid>
-
-                                        <Grid xs={4}>
-                                            <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                                <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                                <BasicBars />
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <span>Numero de vendedores</span>
-                                                </div>
-                                            </div>
-                                        </Grid>
-
-                                        <Grid xs={4}>
-                                            <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                                <h4 style={{ margin: '0' }}>Pesos</h4>
-                                                <BasicBars />
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <span>Numero de vendedores</span>
-                                                </div>
-                                            </div>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            )
-                            }
-
-                            {selectedSubTab === 'subTab2' && (
-                                <div>
-                                    <Box sx={{ width: '100%' }}>
-                                        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                            <Grid xs={8}>
-                                                <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                                    <h4 style={{ margin: '0' }}>Unidades</h4>
-                                                    <BasicBars />
-                                                    <div style={{ textAlign: 'center' }}>
-                                                        <span>Numero de vendedores</span>
-                                                    </div>
-                                                </div>
+                                </>
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0' }}>Volumenes de ventas mes a mes</h4>
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                                            <Grid xs={4}>
+                                                <MixedBarChart data={volumenesChart.total_venta_neta_acum_un} xLabels={volumenesChart.labels} color={'#CDDE00'} />
+                                                <div style={{ textAlign: 'center' }}>Unidades</div>
                                             </Grid>
 
                                             <Grid xs={4}>
-                                                <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                                    <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                                    <BasicBars />
-                                                    <div style={{ textAlign: 'center' }}>
-                                                        <span>Numero de vendedores</span>
-                                                    </div>
-                                                </div>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                </div>
-                            )
-                            }
-                            {selectedSubTab === 'subTab3' && (
-                                <div>
-                                    <Box sx={{ width: '100%' }}>
-                                        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                            <Grid xs={6}>
-                                                <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                                    <h4 style={{ margin: '0' }}>Unidades</h4>
-                                                    <BasicBars />
-                                                    <div style={{ textAlign: 'center' }}>
-                                                        <span>Numero de vendedores</span>
-                                                    </div>
-                                                </div>
+                                                <MixedBarChart data={volumenesChart.total_venta_neta_acum_kg} xLabels={volumenesChart.labels} color={'#3BB6A7'} />
+                                                <div style={{ textAlign: 'center' }}>Kilogramos</div>
                                             </Grid>
 
-                                            <Grid xs={6}>
-                                                <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                                    <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                                    <BasicBars />
-                                                    <div style={{ textAlign: 'center' }}>
-                                                        <span>Numero de vendedores</span>
-                                                    </div>
-                                                </div>
+                                            <Grid xs={4}>
+                                                <MixedBarChart data={volumenesChart.total_venta_neta_acum_eco} xLabels={volumenesChart.labels} color={'#F9B242'} />
+                                                <div style={{ textAlign: 'center' }}>Pesos</div>
                                             </Grid>
                                         </Grid>
-                                    </Box>
-                                </div>
-                            )
-                            }
-                        </>
-                    )
-                    }
-                </div>
+                                    </div>
+                                </Grid>
+                            </Grid>
+                        )
+                        }
 
-                <div style={{ marginTop: '20px', textAlign: 'end' }}>
+                        {selectedTab === 'tab2' && (
+                            <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
+                                <>
+                                    <Grid xs={4}>
+                                        <div className='cart'>
+                                            <h4 style={{ margin: '0' }}>Visitas programadas</h4>
+                                            <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_planeadas.toLocaleString('es-ES')}</div>
+                                        </div>
+                                    </Grid>
+                                    <Grid xs={4}>
+                                        <div className='cart'>
+                                            <h4 style={{ margin: '0' }}>Visitas efectivas</h4>
+                                            <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_efectivas.toLocaleString('es-ES')}</div>
+                                        </div>
+                                    </Grid>
+                                    <Grid xs={4}>
+                                        <div className='cart'>
+                                            <h4 style={{ margin: '0' }}>Visitas no efectivas</h4>
+                                            <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_no_efectivas.toLocaleString('es-ES')}</div>
+                                        </div>
+                                    </Grid>
+                                </>
+
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0' }}>Efectividad de ventas mes a mes</h4>
+
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                                            <MixedBarChart data={efectividadVentasChart.data} xLabels={efectividadVentasChart.labels} color={'#CDDE00'} />
+                                        </Grid>
+                                    </div>
+                                </Grid>
+                            </Grid>
+                        )
+                        }
+
+                        {selectedTab === 'tab3' && (
+                            <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
+                                <>
+                                    <Grid xs={6}>
+                                        <div className='cart'>
+                                            <h4 style={{ margin: '0' }}>Total referencias</h4>
+                                            <div style={{ fontSize: '18px' }}>{referencias.referencias_total.toLocaleString('es-ES')}</div>
+                                        </div>
+                                    </Grid>
+                                    <Grid xs={6}>
+                                        <div className='cart'>
+                                            <h4 style={{ margin: '0' }}>Total de clientes</h4>
+                                            <div style={{ fontSize: '18px' }}>{Number(830).toLocaleString('es-ES')}</div>
+                                        </div>
+                                    </Grid>
+                                </>
+
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0' }}>Promedio de referencias vendidas por cliente mes a mes</h4>
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                                            <MixedBarChart data={referenciasChart.data} xLabels={referenciasChart.labels} color={'#F9B242'} />
+                                        </Grid>
+                                    </div>
+                                </Grid>
+                            </Grid>
+                        )
+                        }
+
+                        {selectedTab === 'tab4' && (
+                            <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
+                                <>
+                                    <Grid xs={6}>
+                                        <div className='cart'>
+                                            <h4 style={{ margin: '0' }}>Presupuesto total</h4>
+                                            <div style={{ fontSize: '18px' }}>{'$' + ejecucionPresupuestal.ppto.toLocaleString('es-ES')}</div>
+                                        </div>
+                                    </Grid>
+                                    <Grid xs={6}>
+                                        <div className='cart'>
+                                            <h4 style={{ margin: '0' }}>Ventas totales</h4>
+                                            <div style={{ fontSize: '18px' }}>{'$' + ejecucionPresupuestal.ventas.toLocaleString('es-ES')}</div>
+                                        </div>
+                                    </Grid>
+                                </>
+
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0' }}>Promedio ejecución presupuestal mes a mes</h4>
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+                                            <MixedBarChart data={ejecucionPresupuestalChart.data} xLabels={ejecucionPresupuestalChart.labels} color={'#CDDE00'} />
+                                        </Grid>
+                                    </div>
+                                </Grid>
+                            </Grid>
+                        )
+                        }
+                    </div>
+
+                    {/* <div style={{ marginTop: '20px', textAlign: 'end' }}>
                     <Button onClick={onClose} variant="outlined">Cerrar</Button>
-                </div>
+                </div> */}
 
-            </div>
+                </div>
+            )}
         </div>
-    );
+    )
 }
 
 export default Modal;
