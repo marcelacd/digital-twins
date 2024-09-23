@@ -4,9 +4,9 @@ import { AthenaClient } from '@aws-sdk/client-athena';
 const client = new AthenaClient({
     region: 'us-east-1',
     credentials: {
-        accessKeyId: 'ASIAQYEI4S5KU2JGR7RX',
-        secretAccessKey: 'eA1gwJwyRKMR+YsYCC7uWdDn1mJijhc0VmDERyP2',
-        sessionToken: "IQoJb3JpZ2luX2VjEGEaCXVzLWVhc3QtMSJIMEYCIQDuwcQ+aK0BrcIEy44/h+XnVRjynbKvnUo4DEYY8Pr01AIhALLcSHN5EJyyavIwSogZWWozpNQsAitQ7DlYyBGP/k8wKqkCCJr//'///'//'///wEQABoMMDUxODI2NjkzOTczIgweMVnpk6hRXmW+Id0q/QFfs4lH3fqEM4Kxnvr+1bKaK38d/IwKCpm/DleBE4iDN6RbRQIEiHY+fWqMLHjcPckMypPWtPl2akURbKaOevPFVBxLDkZdDbn45RkciWe1iu9AftMuCkQmG/NMG4TvQzeYLZjxdWpzluArAl0k5/Vue4eEpieGhzI+HrQpWA3Mxy4C2ej2lVS/AYuxBYCHud2sjkQM3O7EzQowCekIOyfyjMR0dH7etxOe2mEmkbyzEQgTEWFmFiYy8A+filIrZ8JsBVUKrMNp/AIT9/DKIA5neO/GIGuFRgdqZB3np+hy+dbbCtqab71ot6P+nBSVlZERRWlJrRVZNfWjsjVDMPvHvbcGOpwBLJEIF/OKTvsh5YSX0uBM37CTUUeoIjXPtEK6ZsuhEER6gVw1C38NwGFqbNHNZcILkL0IjBeke/oHGtHqU5bp7iZymulnClXMD5ybPrASjgAGoQmy8ugmvCwSE6ZCpmrekp9YWpT7rSW2H/jphVHpM8ZP+pZbFDZtmjYsvRbgdxrOXNG4HzlqgkT4kjW91kPWixRhQll8Rwz0M6bz"
+        accessKeyId: 'ASIAQYEI4S5KZUQV2NXG',
+        secretAccessKey: 'e3I33hMVai9jsFiPeLAj5GWwtmcnCcqGSgTwpSaD',
+        sessionToken: "IQoJb3JpZ2luX2VjEIv//'//'//'///'/wEaCXVzLWVhc3QtMSJHMEUCIQDEHw8+NKrZ3bnDc0SPjsq/sCylvemVzjXhzlVOh1l5twIgTZQWF76tBr5C7TyYjzcCoC7Q4UT3lzL7HKlxOae+2OwqqQIIxP//////////ARAAGgwwNTE4MjY2OTM5NzMiDAnn3zLI/J2hofIqBSr9AcUxTnci0CASkDM5eNrwc5bZbV3egS/0WfLejhMK2Mk1fcEgIXQkHBZfItgNJnDP/Lx20JEYZvCVZg2DIb3fGisXoMgwAkoPcyvfkMUf20lFF0+YEzGTo+ida4yjD7Xl909bE8mukfnwK2xXKvG+NtXrh41BiQoIBY4+XWEvwLSA0gZYqu75Ma/eHU1OfPoo7G7kwlg1lJ+QVoO21Pt2+62RtWd8n1dYqkoMnLGBq0sAPaVJXr3osGiohBb1t1HN29LLJ+6vm5Cm2pDThO2vyrimNuM5gUCha/d/SaKknv47Ms7VACGrl0RoAjmRDkv8rtexXuenD5YIKnQELakwkvfGtwY6nQGpgYyMX2ixbsePFlNlB6UgrBINRmdjiMWWqS3Xz2jIpqIQUNKntWYZVtnKkXZr8xxp+Kx5UoJ1sYVPpLZbdsat8dVhtY9mTJaHyPltxNG4LHxuQMwYXWvY9frREfQ+e5GN8RJdo7URXMWlvLLYxiuR1/HpQ0x/vT4hqjUzQadLGhpPQp2uhF0QupBIMrMuDKBqExHAKyk5v9lNB1SH"
     }
 });
 

@@ -11,6 +11,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import NavigationIcon from '@mui/icons-material/Navigation';
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -22,6 +23,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 import { city } from './data.ts';
 import InputSelect from '../input/InputSelect.jsx'
+import DiscreteSlider from '../input/Slider.jsx'
 
 const currencies = [
     {
@@ -30,101 +32,106 @@ const currencies = [
     },
 ]
 
-const listaMeses = [
-    {
-        id: 'ABR',
-        label: 'Abri',
-    },
-    {
-        id: 'MAY',
-        label: 'Mayo',
-    },
-    {
-        id: 'JUN',
-        label: 'Junio',
-    },
-]
-
-const zones = [
-    {
-        name: 'TDBC Centro_Oriente',
-        totalUnidades: 22347,
-        totalKg: 5400,
-        totalPesos: 39745543,
-        efectividad: 99,
-        proRef: 12.5
-    },
-    {
-        name: 'TDBC Libertador',
-        totalUnidades: 11347,
-        totalKg: 5400,
-        totalPesos: 39745543,
-        efectividad: 94,
-        proRef: 18.6
-    },
-    {
-        name: 'TDBC La_Sabana',
-        totalUnidades: 11347,
-        totalKg: 5400,
-        totalPesos: 39745543,
-        efectividad: 96,
-        proRef: 10.1
-    }
-]
-
-function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, referencias, efectividadVentas }) {
+function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPresupuestal, referencias, efectividadVentas, changeMeses, changeUncheckedZones }) {
     const [expanded, setExpanded] = React.useState(false);
     const [ciudad, setCiudad] = React.useState('BG');
-    const [meses, setMeses] = React.useState('JUN');
+    const [uncheckedZones, setUncheckedZones] = React.useState([]);
 
     const handleChangeExpanded = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     }
 
+    //Select de la ciudad
     const handleChangeSelect = (event) => {
         setCiudad(event.target.value);
 
         sendMessageToIframe({
-            codeCity: event.target.value,
-            value: city[event.target.value]
+            codeCity: ciudad,
+            value: city[ciudad]
         })
     }
 
-    const handleChangeSelectMes = (event) => {
-        setMeses(event.target.value);
-        console.log(meses)
-
-        // sendMessageToIframe({
-        //     codeCity: event.target.value,
-        //     value: city[event.target.value]
-        // })
+    const handleChangeMeses = (meses) => {
+        const mesesSQL = meses.map(mes => `'${mes}'`).join(', ');
+        changeMeses(mesesSQL)
     }
 
     const handleCheckbox = (event) => {
-        if (event.target.checked) {
+        const { id, checked } = event.target
+
+        // if (!checked) {
+        //     setUncheckedZones((prevZones) => [...prevZones, id])
+        //     changeUncheckedZones(uncheckedZones)
+        // } else {
+        //     setUncheckedZones((prevZones) => prevZones.filter(zone => zone !== id))
+        //     changeUncheckedZones(uncheckedZones)
+        // }
+
+        if (!checked) {
+            setUncheckedZones((prevZones) => {
+                const updatedZones = [...prevZones, id];
+                changeUncheckedZones(updatedZones)
+                return updatedZones
+            })
+        } else {
+            setUncheckedZones((prevZones) => {
+                const updatedZones = prevZones.filter(zone => zone !== id);
+                changeUncheckedZones(updatedZones)
+                return updatedZones
+            })
+        }
+
+        if (checked) {
             sendMessageToIframe({
-                type: event.target.id || event.target.checked,
+                type: id,
+                fly: false,
                 value: {}
             })
         } else {
             sendMessageToIframe({
                 type: 'delete',
-                value: event.target.id
+                value: id
+            })
+        }
+    }
+
+    const handleSwitch = (event) => {
+        const { id, fly, checked } = event.target
+
+        if (checked) {
+            sendMessageToIframe({
+                type: id || checked,
+                fly: false,
+                value: {}
+            })
+        } else if (fly) {
+            sendMessageToIframe({
+                type: fly,
+                fly: true,
+                value: {}
+            })
+        } else {
+            sendMessageToIframe({
+                type: 'delete',
+                value: id
             })
         }
     }
 
     return (
-        (Object.entries(ventaVolumenes).length > 0) && (
+        (Object.entries(ventaVolumenes).length > 0 && Object.entries(dataCiudad).length > 0) && (
             <Box className="container-box">
                 <div className="controls-header">
                     <h2>Nutresa - Digital Twin</h2>
                 </div>
 
                 <InputSelect currencies={currencies} handleChangeSelect={handleChangeSelect} defaultValue={'BG'} label={'ciudad'}></InputSelect>
-                {/* <InputSelect currencies={listaMeses} handleChangeSelect={handleChangeSelectMes} defaultValue={'JUN'} label={'Meses'}></InputSelect> */}
 
-                <Box sx={{ padding: '0 20px 20px' }}><strong>Datos a mes de junio</strong></Box>
+                <div style={{ margin: 20, display: 'flex', justifyContent: 'center' }}>
+                    <DiscreteSlider handleChangeMeses={handleChangeMeses}></DiscreteSlider>
+                </div>
+
+                {/* <Box sx={{ padding: '0 20px 20px' }}><strong>Datos a mes de junio</strong></Box> */}
 
                 <Accordion className='accordion-box points' expanded={expanded === 'panel1'} onChange={handleChangeExpanded('panel1')}>
                     <AccordionSummary
@@ -138,34 +145,23 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                         </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                        {/* <FormGroup>
-                            <div className='puntos-content'>
-                                <div className='checkbox-column'>
-                                    <FormGroup>
-                                        <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='billboard' />} label="Billboard" />
-                                        <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='circle' />} label="Circle" />
-                                        <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='route' />} label="Route" />
-                                        <FormControlLabel control={<Checkbox color="success" onChange={handleCheckbox} id='heatmap' />} label="Heatmap" />
-                                    </FormGroup>
-                                </div>
-                            </div>
-                        </FormGroup> */}
-                        {/* <Box> */}
-                        <Grid container rowSpacing={1} >
+                        <Grid container rowSpacing={0} >
                             {
-                                ventaVolumenes.data.map((zone, index) => (
+                                dataCiudad[ciudad].zone.map((zone, index) => (
                                     <React.Fragment key={index}>
-                                        <Grid xs={8}>
-                                            <div className='btn-zone' onClick={() => handleCheckbox({ target: { checked: `${zone.zona}` } })}>{zone.zona}</div>
+                                        <Grid xs={7}>
+                                            <FormControlLabel control={<Checkbox defaultChecked onChange={handleCheckbox} id={zone.code} size="small" />} label={zone.code} />
                                         </Grid>
-                                        <Grid xs={4}>
-                                            <FormControlLabel control={<Switch onChange={handleCheckbox} id={`client${index + 1}`} size="small" />} label="Clientes" />
+                                        <Grid xs={2}>
+                                            <NavigationIcon fontSize='small' color="primary" sx={{ cursor: 'pointer' }} onClick={() => handleSwitch({ target: { fly: `${zone.code}` } })} />
+                                        </Grid>
+                                        <Grid xs={3}>
+                                            <FormControlLabel sx={{ fontSize: 14 }} control={<Switch onChange={handleSwitch} id={`client${index + 1}`} size="small" />} label="Clientes" />
                                         </Grid>
                                     </React.Fragment>
                                 ))
                             }
                         </Grid>
-                        {/* </Box> */}
                     </AccordionDetails>
                 </Accordion>
 
@@ -183,7 +179,7 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                     <AccordionDetails>
                         <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                             <Grid>
-                                <span style={{ color: '#009877' }}><strong>Consolidado de la ciudad</strong></span>
+                                <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                                 <Grid container rowSpacing={0.5} columnSpacing={{ xs: 1, sm: 3, md: 4 }}>
                                     <Grid xs={4}>
                                         <div>{ventaVolumenes.consolidado.ventas_un.toLocaleString('es-ES') + ' U'}</div>
@@ -236,10 +232,10 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                            <Grid xs={6}>
-                                <span style={{ color: '#009877' }}><strong>Consolidado de la ciudad</strong></span>
+                            <Grid xs={7}>
+                                <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
-                            <Grid xs={6}>
+                            <Grid xs={5}>
                                 <div>{`${efectividadVentas.consolidado.toFixed(2)}%`}</div>
                             </Grid>
                         </Grid>
@@ -248,10 +244,10 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                             efectividadVentas.data.map((zona, index) => (
                                 <React.Fragment key={index}>
                                     <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                        <Grid xs={6}>
+                                        <Grid xs={7}>
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
-                                        <Grid xs={6}>
+                                        <Grid xs={5}>
                                             <div>{`${zona.efectividad.toFixed(2)}%`}</div>
                                         </Grid>
                                     </Grid>
@@ -274,10 +270,10 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                            <Grid xs={6}>
-                                <span style={{ color: '#009877' }}><strong>Consolidado de la ciudad</strong></span>
+                            <Grid xs={7}>
+                                <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
-                            <Grid xs={6}>
+                            <Grid xs={5}>
                                 {referencias.consolidado.toLocaleString('es-ES')}
                             </Grid>
                         </Grid>
@@ -286,10 +282,10 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                             referencias.data.map((zona, index) => (
                                 <React.Fragment key={index}>
                                     <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                        <Grid xs={6}>
+                                        <Grid xs={7}>
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
-                                        <Grid xs={6}>
+                                        <Grid xs={5}>
                                             {zona.referencias_total.toLocaleString('es-ES') + ' por cliente'}
                                         </Grid>
                                     </Grid>
@@ -312,10 +308,10 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                            <Grid xs={6}>
-                                <span style={{ color: '#009877' }}><strong>Consolidado de la ciudad</strong></span>
+                            <Grid xs={7}>
+                                <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
-                            <Grid xs={6}>
+                            <Grid xs={5}>
                                 <div>{`${ejecucionPresupuestal.consolidado.toFixed(2)}%`}</div>
                             </Grid>
                         </Grid>
@@ -324,10 +320,10 @@ function Controls({ sendMessageToIframe, ventaVolumenes, ejecucionPresupuestal, 
                             ejecucionPresupuestal.data.map((zona, index) => (
                                 <React.Fragment key={index}>
                                     <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                        <Grid xs={6}>
+                                        <Grid xs={7}>
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
-                                        <Grid xs={6}>
+                                        <Grid xs={5}>
                                             <div>{`${zona.ejecucion_presupuestal.toFixed(2)}%`}</div>
                                         </Grid>
                                     </Grid>

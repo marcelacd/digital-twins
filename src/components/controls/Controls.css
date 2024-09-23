@@ -23,12 +23,13 @@
   }
 
   .btn-zone {
+    font-size: 14px;
     background: #FFFFFF;
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 4px 0px;
     cursor: pointer;
     text-align: center;
-    width: 70%;
+    width: 40%;
   }
 
   .accordion-box {
@@ -45,5 +46,9 @@
 
 .css-eqpfi5-MuiAccordionSummary-content.Mui-expanded {
   margin: 12px 0 !important;
+}
+
+.css-ahj2mt-MuiTypography-root{
+  font-size: 14px !important;
 }
 

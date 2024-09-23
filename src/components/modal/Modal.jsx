@@ -9,9 +9,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { executeAthenaQuery } from '../../services/athenaService.js';
 
 
-function Modal({ isOpen, onClose, selectedZona }) {
+function Modal({ isOpen, onClose, selectedZona, selectMesesSQL }) {
     const [selectedTab, setSelectedTab] = useState('tab1');
-    const [vendedores, setVendedores] = useState()
     const [loading, setloading] = useState(true)
 
     const [ventaVolumenes, setVentaVolumenes] = useState({})
@@ -19,15 +18,14 @@ function Modal({ isOpen, onClose, selectedZona }) {
     const [ejecucionPresupuestal, setEjecucionPresupuestal] = useState({})
     const [ejecucionPresupuestalChart, setEjecucionPresupuestalChart] = useState({})
     const [referencias, setReferencias] = useState({})
+    const [totalClientes, setTotalClientes] = useState({})
     const [referenciasChart, setReferenciasChart] = useState({})
-
     const [efectividadVentas, setEfectividadVentas] = useState({})
     const [efectividadVentasChart, setEfectividadVentasChart] = useState({})
 
     const handleTitleClickTab = (title) => {
-        setSelectedTab(title);
+        setSelectedTab(title)
     }
-
 
     function transformarDataVolumenes(data) {
         const headers = data[0]
@@ -119,6 +117,18 @@ function Modal({ isOpen, onClose, selectedZona }) {
         })
         setReferencias(resultado[0])
     }
+    function transformarDataTotalClientes(data) {
+        const headers = data[0]
+
+        // Convertir los datos en objetos
+        const resultado = data.slice(1).map(row => {
+            return headers.reduce((obj, header, index) => {
+                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
+                return obj
+            }, {})
+        })
+        setTotalClientes(resultado[0])
+    }
     function transformarDataReferenciasChart(data) {
         const monthOrder = {
             'ENE': 1, 'FEB': 2, 'MAR': 3, 'ABR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AGO': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DIC': 12
@@ -157,7 +167,6 @@ function Modal({ isOpen, onClose, selectedZona }) {
 
         setEfectividadVentas(organizedData)
     }
-
     function transformarDataVentasPlanEfecChart(vPlaneadas, vEfectivas) {
         const monthOrder = {
             'ENE': 1, 'FEB': 2, 'MAR': 3, 'ABR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AGO': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DIC': 12
@@ -218,8 +227,7 @@ function Modal({ isOpen, onClose, selectedZona }) {
         setEfectividadVentasChart(organizedData)
     }
 
-
-    // Ejecuta la query cuando se abre el modal o cambia el tab seleccionado
+    // Ejecuta la query cuando se abre el modal
     useEffect(() => {
         const fetchQueryResults = async () => {
             try {
@@ -229,7 +237,7 @@ function Modal({ isOpen, onClose, selectedZona }) {
                                         SUM(venta_neta_acum_ano_actual_kg) AS ventas_kg,
                                         SUM(venta_neta_acum_ano_actual_un) AS ventas_un, 
                                         SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco
-                                        FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN ('JUN') AND zona = '${selectedZona}' GROUP BY zona`
+                                        FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' GROUP BY zona`
                 const queryVolumenesChart = `SELECT mes,  
                                         SUM(venta_neta_acum_ano_actual_eco) AS total_venta_neta_acum_eco,
                                         SUM(venta_neta_acum_ano_actual_kg) AS total_venta_neta_acum_kg,
@@ -238,20 +246,24 @@ function Modal({ isOpen, onClose, selectedZona }) {
 
                 //Ejecucion presupuestal
                 const queryEjePresupuestal = `SELECT zona, SUM(ppto_neta_acum_ano_actual_eco) AS ppto, SUM(venta_neta_acum_ano_actual_eco) AS ventas
-                                              FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN ('JUN') AND zona = '${selectedZona}' GROUP BY zona;`
+                                              FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' GROUP BY zona;`
                 const queryEjePresupuestalChart = `SELECT mes, (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
                                                    FROM "digital-twins-nutresa-glue-db"."ventas" WHERE zona = '${selectedZona}' GROUP BY mes`;
 
                 //Referencias
-                //Me falta query que me traiga el total de referencias unicas por zona y por mes o meses
-                //Me falta query que me traiga el total de clientes por zona y por mes o meses
                 const queryReferencias = `SELECT zona, SUM(conteo_referencias) AS referencias_total
                                             FROM (SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
                                             FROM (SELECT DISTINCT mes, zona, descripcion_material, nombre_comercial, vendedor_ecom
                                             FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas" WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                             GROUP BY mes, zona, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor
-                                            WHERE mes IN ('JUN') AND zona = '${selectedZona}' GROUP BY zona;`
-
+                                            WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' GROUP BY zona;`
+                const queryTotalClientes = `SELECT zona, SUM(conteo_clientes) AS total_clientes
+                                            FROM (SELECT mes, zona, vendedor_ecom, COUNT(DISTINCT nombre_comercial) AS conteo_clientes
+                                            FROM (SELECT DISTINCT mes, zona, descripcion_material, nombre_comercial, vendedor_ecom
+                                            FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas" 
+                                            WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
+                                            GROUP BY mes, zona, vendedor_ecom) AS clientes_por_vendedor
+                                            WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' GROUP BY zona;`
                 const queryReferenciasChart = `SELECT mes, AVG(conteo_referencias) AS referencias_total
                                            FROM(SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
                                            FROM(SELECT DISTINCT mes, zona, descripcion_material, nombre_comercial, vendedor_ecom
@@ -264,18 +276,15 @@ function Modal({ isOpen, onClose, selectedZona }) {
                 const queryVentasPlaneadas = `SELECT zona, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
                                               FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"
                                               WHERE zona = '${selectedZona}' AND mes IN ('Junio') GROUP BY zona`
-
                 const queryVentasEfectivas = `SELECT zona, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
                                                 SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
                                                 FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
                                                 FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
                                                 WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                                 WHERE zona = '${selectedZona}' AND mes IN ('JUN') GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY zona`
-
                 const queryVentasPlaneadasChart = `SELECT mes, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
                                               FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"
                                               WHERE zona = '${selectedZona}' GROUP BY mes`
-
                 const queryVentasEfectivasChart = `SELECT mes, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
                                                 SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
                                                 FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
@@ -289,8 +298,8 @@ function Modal({ isOpen, onClose, selectedZona }) {
                     respuestaEjePresupuestal,
                     respuestaEjePresupuestalChart,
                     respuestaReferencias,
+                    respuestaTotalClientes,
                     respuestaReferenciasChart,
-
                     respuestaVentasPlaneadas,
                     respuestaVentasEfectivas,
                     respuestaVentasPlaneadasChart,
@@ -301,8 +310,8 @@ function Modal({ isOpen, onClose, selectedZona }) {
                     executeAthenaQuery(queryEjePresupuestal),
                     executeAthenaQuery(queryEjePresupuestalChart),
                     executeAthenaQuery(queryReferencias),
+                    executeAthenaQuery(queryTotalClientes),
                     executeAthenaQuery(queryReferenciasChart),
-
                     executeAthenaQuery(queryVentasPlaneadas),
                     executeAthenaQuery(queryVentasEfectivas),
                     executeAthenaQuery(queryVentasPlaneadasChart),
@@ -314,12 +323,11 @@ function Modal({ isOpen, onClose, selectedZona }) {
                 transformarDataEjePresupuestal(respuestaEjePresupuestal)
                 transformarDataEjePresupuestalChart(respuestaEjePresupuestalChart)
                 transformarDataReferencias(respuestaReferencias)
+                transformarDataTotalClientes(respuestaTotalClientes)
                 transformarDataReferenciasChart(respuestaReferenciasChart)
-
                 transformarDataVentasPlanEfec(respuestaVentasPlaneadas, respuestaVentasEfectivas)
                 transformarDataVentasPlanEfecChart(respuestaVentasPlaneadasChart, respuestaVentasEfectivasChart)
                 setloading(false)
-
             } catch (error) {
                 onClose()
                 console.error('Error fetching data:', error);
@@ -390,7 +398,7 @@ function Modal({ isOpen, onClose, selectedZona }) {
                                 </div>
                             </Grid>
                         </Grid>
-                        <div style={{ marginBottom: '10px' }}>Datos a mes de junio</div>
+                        {/* <div style={{ marginBottom: '10px' }}>Datos a mes de junio</div> */}
 
                         {selectedTab === 'tab1' && (
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
@@ -488,7 +496,7 @@ function Modal({ isOpen, onClose, selectedZona }) {
                                     <Grid xs={6}>
                                         <div className='cart'>
                                             <h4 style={{ margin: '0' }}>Total de clientes</h4>
-                                            <div style={{ fontSize: '18px' }}>{Number(830).toLocaleString('es-ES')}</div>
+                                            <div style={{ fontSize: '18px' }}>{totalClientes.total_clientes.toLocaleString('es-ES')}</div>
                                         </div>
                                     </Grid>
                                 </>

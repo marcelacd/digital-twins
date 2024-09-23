@@ -6,7 +6,10 @@ import './App.css';
 import { executeAthenaQuery } from './services/athenaService.js';
 
 const App = () => {
+  const [loading, setLoading] = useState(true)
   const [dataCiudad, setDataCiudad] = useState({})
+  const [selectMesesSQL, setSelectMesesSQL] = useState(`'JUN'`)
+  const [uncheckedZones, setUncheckedZones] = React.useState([]);
   const [isModalOpen, setModalOpen] = useState(false)
   const [selectedZona, setSelectedZona] = useState('')
   const iframeRef = useRef(null)
@@ -19,18 +22,42 @@ const App = () => {
   const openModal = () => setModalOpen(true)
   const closeModal = () => setModalOpen(false)
 
+  const changeMeses = (meses) => {
+    setSelectMesesSQL(meses)
+  }
+
+  const changeUncheckedZones = (zonas) => {
+    setUncheckedZones(zonas)
+  }
+
+  // function calculateCentro(coordinates) {
+  //   const latitudes = []
+  //   const longitudes = []
+
+  //   coordinates.map(a => {
+  //     latitudes.push(a[0])
+  //     longitudes.push(a[1])
+  //   })
+
+  //   const centro_mapa = [
+  //     (Math.min(...latitudes) + Math.max(...latitudes)) / 2,
+  //     (Math.min(...longitudes) + Math.max(...longitudes)) / 2
+  //   ]
+  //   return centro_mapa
+  // }
+
   function calculateCentroid(coordinates) {
-    let xSum = 0, ySum = 0;
+    let xSum = 0, ySum = 0
 
     coordinates.forEach(([y, x]) => {
-      xSum += x;
-      ySum += y;
+      xSum += x
+      ySum += y
     })
 
-    const centerX = xSum / coordinates.length;
-    const centerY = ySum / coordinates.length;
+    const centerX = xSum / coordinates.length
+    const centerY = ySum / coordinates.length
 
-    return [centerY, centerX];
+    return [centerY, centerX]
   }
   function sortCoordinatesByAngle(coordinates) {
     const centroid = calculateCentroid(coordinates);
@@ -42,8 +69,8 @@ const App = () => {
     })
   }
   function transformarDataZonas(zonas, clientes) {
-    const result = [];
-    const zoneMap = {};
+    const result = []
+    const zoneMap = {}
 
     // Iteramos por las filas (omitimos la primera que contiene los encabezados)
     for (let i = 1; i < zonas.length; i++) {
@@ -58,20 +85,22 @@ const App = () => {
       zoneMap[zone].push([parseFloat(coord_y), parseFloat(coord_x)]);
     }
 
-    // Convertimos el mapa de zonas en el formato deseado y ordenamos las coordenadas
     Object.keys(zoneMap).forEach((zone, index) => {
-      const calculateCentroid1 = calculateCentroid(zoneMap[zone]);
-      const sortedCoordinates = sortCoordinatesByAngle(zoneMap[zone]);
+      const centroZona = calculateCentroid(zoneMap[zone])
+      const sortedCoordinates = sortCoordinatesByAngle(zoneMap[zone])
+      // const calculate = calculateCentro(zoneMap[zone])
 
       result.push({
         code: zone,
         height: `${index + 1}00`,
         flyLocation: {
-          lon: [calculateCentroid1[1]],
-          lat: [calculateCentroid1[0]],
-          height: 2904.178188038059,
-          heading: 4.360248260903442,
-          pitch: -42.55796094369222,
+          // lon: calculate[1],
+          // lat: calculate[0],
+          lon: [centroZona[1]],
+          lat: [centroZona[0]],
+          height: 6000,
+          heading: 0, // o cualquier dirección deseada
+          pitch: -90, // Para mirar completamente hacia abajo
           name: ''
         },
         coordinate: sortedCoordinates,
@@ -80,7 +109,7 @@ const App = () => {
       })
     })
 
-    return result;
+    return result
   }
   function transformarDataClientes(clientes) {
     const zoneMap = {};
@@ -99,7 +128,6 @@ const App = () => {
     }
     return zoneMap
   }
-
 
 
   function transformarDataVolumenes(data) {
@@ -230,7 +258,12 @@ const App = () => {
     })
   }
 
-
+  function ajustarConsulta(queryBase) {
+    if (uncheckedZones.length > 0) {
+      queryBase += ` AND zona NOT IN (${uncheckedZones.map(zona => `'${zona}'`).join(', ')})`
+    }
+    return queryBase += `GROUP BY zona`
+  }
 
   // useEffect para añadir el listener al cargar el componente
   useEffect(() => {
@@ -254,49 +287,15 @@ const App = () => {
       try {
         const queryClientes = `SELECT DISTINCT zona, cv_barrio, coord_y, coord_x FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"`
         const queryZonas = `SELECT DISTINCT zona, coord_y, coord_x FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."zonas"`
-
-        const queryVolumenes = `SELECT zona, 
-                                SUM(venta_neta_acum_ano_actual_kg) AS ventas_kg,
-                                SUM(venta_neta_acum_ano_actual_un) AS ventas_un, 
-                                SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco
-                                FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN ('JUN') GROUP BY zona`
-
-        const queryReferencias = `SELECT zona, AVG(conteo_referencias) AS referencias_total FROM (
-                                  SELECT zona, mes, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
-                                  FROM (SELECT DISTINCT zona, mes, descripcion_material, nombre_comercial, vendedor_ecom
-                                  FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
-                                  WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas WHERE mes  IN ('JUN') 
-                                  GROUP BY zona, mes, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor GROUP BY zona`
-
-        const queryEjePresupuestal = `SELECT zona, (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
-                                            FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN ('JUN') GROUP BY zona`
-
-        const queryVentasPlaneadas = `SELECT zona, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
-                                      FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra" WHERE mes IN ('Junio') GROUP BY zona;`
-        const queryVentasEfectivas = `SELECT zona, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
-                                      SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
-                                      FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
-                                      FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
-                                      WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
-                                      WHERE mes IN ('JUN') GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY zona;`
+        // SELECT DISTINCT zona, coord_y, coord_x FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."zonas" WHERE zona NOT IN ('TDBC Libertador')
 
         const [
           respuestaQueryClientes,
           respuestaQueryZonas,
-          respuestaVolumenes,
-          respuestaReferencias,
-          respuestaEjePresupuestal,
-          respuestaVentasPlaneadas,
-          respuestaVentasEfectivas,
         ] = await Promise.all([
           executeAthenaQuery(queryClientes),
           executeAthenaQuery(queryZonas),
-          executeAthenaQuery(queryVolumenes),
-          executeAthenaQuery(queryReferencias),
-          executeAthenaQuery(queryEjePresupuestal),
-          executeAthenaQuery(queryVentasPlaneadas),
-          executeAthenaQuery(queryVentasEfectivas),
-        ]);
+        ])
         // const response = await executeAthenaQuery(query);)
 
         // Data para pintar poligonos y clientes
@@ -316,20 +315,78 @@ const App = () => {
           }
         }
         setDataCiudad(dataZonasCiudad)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+    fetchData();
+  }, []) // Ejecutar solo una vez al cargar el componente
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let queryVolumenes = `SELECT zona, 
+                              SUM(venta_neta_acum_ano_actual_kg) AS ventas_kg,
+                              SUM(venta_neta_acum_ano_actual_un) AS ventas_un, 
+                              SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco
+                              FROM "digital-twins-nutresa-glue-db"."ventas"
+                              WHERE mes IN (${selectMesesSQL})`
+        queryVolumenes = ajustarConsulta(queryVolumenes)
+
+        let queryReferencias = `SELECT zona, AVG(conteo_referencias) AS referencias_total FROM (
+                                  SELECT zona, mes, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
+                                  FROM (SELECT DISTINCT zona, mes, descripcion_material, nombre_comercial, vendedor_ecom
+                                  FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
+                                  WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
+                                  GROUP BY zona, mes, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor 
+                                  WHERE mes  IN (${selectMesesSQL})`
+        queryReferencias = ajustarConsulta(queryReferencias)
+
+        let queryEjePresupuestal = `SELECT zona, (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
+                                            FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN (${selectMesesSQL})`
+        queryEjePresupuestal = ajustarConsulta(queryEjePresupuestal)
+
+        //Ajustar filtro de meses
+        let queryVentasPlaneadas = `SELECT zona, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
+                                      FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra" WHERE mes IN ('Junio')`
+        queryVentasPlaneadas = ajustarConsulta(queryVentasPlaneadas)
+
+        let queryVentasEfectivas = `SELECT zona, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
+                                      SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
+                                      FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
+                                      FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
+                                      WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
+                                      GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal
+                                      WHERE mes IN ('JUN')`
+        queryVentasEfectivas = ajustarConsulta(queryVentasEfectivas)
+
+        const [
+          respuestaVolumenes,
+          respuestaReferencias,
+          respuestaEjePresupuestal,
+          respuestaVentasPlaneadas,
+          respuestaVentasEfectivas,
+        ] = await Promise.all([
+          executeAthenaQuery(queryVolumenes),
+          executeAthenaQuery(queryReferencias),
+          executeAthenaQuery(queryEjePresupuestal),
+          executeAthenaQuery(queryVentasPlaneadas),
+          executeAthenaQuery(queryVentasEfectivas),
+        ])
 
         transformarDataVolumenes(respuestaVolumenes)
         transformarDataReferencias(respuestaReferencias)
         transformarDataEjecucionPresupuestal(respuestaEjePresupuestal)
         transformarDataVentasPlanEfec(respuestaVentasPlaneadas, respuestaVentasEfectivas)
 
+        setLoading(false)
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching data:', error)
       }
-    };
+    }
+    fetchData()
 
-    fetchData();
-
-  }, []); // Ejecutar solo una vez al cargar el componente
+  }, [selectMesesSQL, uncheckedZones])
 
 
   // useEffect para enviar la data al iframe una vez que dataCiudad cambie
@@ -361,10 +418,13 @@ const App = () => {
       <div className="controls">
         <Controls
           sendMessageToIframe={sendMessageToIframe}
+          dataCiudad={dataCiudad}
           ventaVolumenes={ventaVolumenes}
           ejecucionPresupuestal={ejecucionPresupuestal}
           referencias={referencias}
           efectividadVentas={efectividadVentas}
+          changeMeses={changeMeses}
+          changeUncheckedZones={changeUncheckedZones}
         />
       </div>
 
@@ -375,8 +435,49 @@ const App = () => {
         onClose={closeModal}
         selectedZona={selectedZona}
         ventaVolumenes={ventaVolumenes}
+        selectMesesSQL={selectMesesSQL}
       />}
     </div>
+    // loading
+    //   ? (
+    //     <div className="contenedor-loader" >
+    //       Cargando contenido...
+    //       <div>
+    //       <span className="loader"></span>
+    //     </div>
+    //     </div>
+    //   )
+    //   : (
+    //     <div className="app">
+    //       <div className="abso" style={{ position: 'relative' }}>
+    //         <div className="rel">
+    //           <Form />
+    //         </div>
+    //       </div>
+
+    //       <div className="controls">
+    //         <Controls
+    //           sendMessageToIframe={sendMessageToIframe}
+    //           dataCiudad={dataCiudad}
+    //           ventaVolumenes={ventaVolumenes}
+    //           ejecucionPresupuestal={ejecucionPresupuestal}
+    //           referencias={referencias}
+    //           efectividadVentas={efectividadVentas}
+    //           changeMeses={changeMeses}
+    //         />
+    //       </div>
+
+    //       <iframe className='iframe' src="map/index.html" title="map" width="100%" height="100%" ref={iframeRef}></iframe>
+
+    //       {isModalOpen && <Modal
+    //         isOpen={isModalOpen}
+    //         onClose={closeModal}
+    //         selectedZona={selectedZona}
+    //         ventaVolumenes={ventaVolumenes}
+    //         selectMesesSQL={selectMesesSQL}
+    //       />}
+    //     </div>
+    //   )
   )
 }
 
