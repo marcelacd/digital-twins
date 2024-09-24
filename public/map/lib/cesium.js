@@ -1,6 +1,3 @@
-import route from './route.js'
-import heatMapData from './heatmapData.js'
-
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzMWQ0NjcwZi1mYTY2LTRhYzEtOWM1NS0wOTc4YjA3MjM3ZjIiLCJpZCI6MTczMzQ5LCJpYXQiOjE2OTgwNTE5NzJ9.y-PuQVtDcv_MxaYk-k0IL0oiWX0Dwk4KNywLq73UiFQ';
 
 // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
