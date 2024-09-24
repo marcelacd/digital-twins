@@ -41,13 +41,13 @@ export default function RangeSlider({ handleChangeMeses }) {
             12: 'DIC',
         }
 
-        const fullRange = [];
+        const fullRange = []
         for (let i = newValue[0]; i <= newValue[1]; i++) {
-            fullRange.push(convertir[i]);
+            fullRange.push(convertir[i])
         }
 
-        handleChangeMeses(fullRange);
-        setSelectedRange(newValue);
+        handleChangeMeses({fullRange, newValue})
+        setSelectedRange(newValue)
     };
 
     const getAriaLabel = (index) => {

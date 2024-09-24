@@ -39,7 +39,7 @@ function Form() {
             <Box>
                 <div className="controls-heade">
                     <IconButton onClick={toggleOpen}>
-                        {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                        {isOpen ? <ChevronRightIcon  /> : <ChevronLeftIcon/>}
                     </IconButton>
                 </div>
                 {isOpen && (

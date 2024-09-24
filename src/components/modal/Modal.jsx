@@ -8,8 +8,22 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import { executeAthenaQuery } from '../../services/athenaService.js';
 
+const months = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'Abril' },
+    { value: 5, label: 'Mayo' },
+    { value: 6, label: 'Junio' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' },
+];
 
-function Modal({ isOpen, onClose, selectedZona, selectMesesSQL }) {
+function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMeses }) {
     const [selectedTab, setSelectedTab] = useState('tab1');
     const [loading, setloading] = useState(true)
 
@@ -227,6 +241,11 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL }) {
         setEfectividadVentasChart(organizedData)
     }
 
+    function valuetext(value) {
+        const month = months.find(month => month.value === value);
+        return month ? month.label : '';
+    }
+
     // Ejecuta la query cuando se abre el modal
     useEffect(() => {
         const fetchQueryResults = async () => {
@@ -398,31 +417,38 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL }) {
                                 </div>
                             </Grid>
                         </Grid>
-                        {/* <div style={{ marginBottom: '10px' }}>Datos a mes de junio</div> */}
 
                         {selectedTab === 'tab1' && (
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
-                                <>
-                                    <div></div>
-                                    <Grid xs={4}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Unidades</h4>
-                                            <div style={{ fontSize: '18px' }}>{ventaVolumenes.ventas_un.toLocaleString('es-ES') + ' U'}</div>
-                                        </div>
-                                    </Grid>
-                                    <Grid xs={4}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                            <div style={{ fontSize: '18px' }}>{ventaVolumenes.ventas_kg.toLocaleString('es-ES') + ' Kg'}</div>
-                                        </div>
-                                    </Grid>
-                                    <Grid xs={4}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Pesos</h4>
-                                            <div style={{ fontSize: '18px' }}>{'$' + ventaVolumenes.ventas_eco.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                </>
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0 0 7px' }}>
+                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
+                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                        </h4>
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
+                                            <Grid xs={4}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Unidades</h4>
+                                                    <div style={{ fontSize: '18px' }}>{ventaVolumenes.ventas_un.toLocaleString('es-ES') + ' U'}</div>
+                                                </div>
+                                            </Grid>
+                                            <Grid xs={4}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Kilogramos</h4>
+                                                    <div style={{ fontSize: '18px' }}>{ventaVolumenes.ventas_kg.toLocaleString('es-ES') + ' Kg'}</div>
+                                                </div>
+                                            </Grid>
+                                            <Grid xs={4}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Pesos</h4>
+                                                    <div style={{ fontSize: '18px' }}>{'$' + ventaVolumenes.ventas_eco.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+                                </Grid>
                                 <Grid xs={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0' }}>Volumenes de ventas mes a mes</h4>
@@ -450,26 +476,35 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL }) {
 
                         {selectedTab === 'tab2' && (
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
-                                <>
-                                    <Grid xs={4}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Visitas programadas</h4>
-                                            <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_planeadas.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                    <Grid xs={4}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Visitas efectivas</h4>
-                                            <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_efectivas.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                    <Grid xs={4}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Visitas no efectivas</h4>
-                                            <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_no_efectivas.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                </>
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0 0 7px' }}>
+                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
+                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                        </h4>
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
+                                            <Grid xs={4}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Visitas programadas</h4>
+                                                    <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_planeadas.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                            <Grid xs={4}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Visitas efectivas</h4>
+                                                    <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_efectivas.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                            <Grid xs={4}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Visitas no efectivas</h4>
+                                                    <div style={{ fontSize: '18px' }}>{efectividadVentas.ventas_no_efectivas.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+                                </Grid>
 
                                 <Grid xs={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
@@ -486,20 +521,29 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL }) {
 
                         {selectedTab === 'tab3' && (
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
-                                <>
-                                    <Grid xs={6}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Total referencias</h4>
-                                            <div style={{ fontSize: '18px' }}>{referencias.referencias_total.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                    <Grid xs={6}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Total de clientes</h4>
-                                            <div style={{ fontSize: '18px' }}>{totalClientes.total_clientes.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                </>
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0 0 7px' }}>
+                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
+                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                        </h4>
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
+                                            <Grid xs={6}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Total referencias</h4>
+                                                    <div style={{ fontSize: '18px' }}>{referencias.referencias_total.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                            <Grid xs={6}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Total de clientes</h4>
+                                                    <div style={{ fontSize: '18px' }}>{totalClientes.total_clientes.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+                                </Grid>
 
                                 <Grid xs={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
@@ -515,20 +559,29 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL }) {
 
                         {selectedTab === 'tab4' && (
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
-                                <>
-                                    <Grid xs={6}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Presupuesto total</h4>
-                                            <div style={{ fontSize: '18px' }}>{'$' + ejecucionPresupuestal.ppto.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                    <Grid xs={6}>
-                                        <div className='cart'>
-                                            <h4 style={{ margin: '0' }}>Ventas totales</h4>
-                                            <div style={{ fontSize: '18px' }}>{'$' + ejecucionPresupuestal.ventas.toLocaleString('es-ES')}</div>
-                                        </div>
-                                    </Grid>
-                                </>
+                                <Grid xs={12}>
+                                    <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
+                                        <h4 style={{ margin: '0 0 7px' }}>
+                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
+                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                        </h4>
+                                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
+                                            <Grid xs={6}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Presupuesto total</h4>
+                                                    <div style={{ fontSize: '18px' }}>{'$' + ejecucionPresupuestal.ppto.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                            <Grid xs={6}>
+                                                <div className='cart'>
+                                                    <h4 style={{ margin: '0' }}>Ventas totales</h4>
+                                                    <div style={{ fontSize: '18px' }}>{'$' + ejecucionPresupuestal.ventas.toLocaleString('es-ES')}</div>
+                                                </div>
+                                            </Grid>
+                                        </Grid>
+                                    </div>
+                                </Grid>
 
                                 <Grid xs={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>

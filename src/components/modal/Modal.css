@@ -36,6 +36,7 @@
     .container {
       .tabs {
         margin: 15px 0;
+        padding-bottom: 5px;
         font-size: 17px;
         text-align: center;
         border-bottom: 1px solid;
@@ -52,6 +53,7 @@
 
   .color-tab {
     color: #009877;
+    font-weight: 600;
   }
 
   .pointer {

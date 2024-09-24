@@ -9,6 +9,7 @@ const App = () => {
   const [loading, setLoading] = useState(true)
   const [dataCiudad, setDataCiudad] = useState({})
   const [selectMesesSQL, setSelectMesesSQL] = useState(`'JUN'`)
+  const [selectedRangeMeses, setSelectedRangeMeses] = useState([6, 6])
   const [uncheckedZones, setUncheckedZones] = React.useState([]);
   const [isModalOpen, setModalOpen] = useState(false)
   const [selectedZona, setSelectedZona] = useState('')
@@ -22,8 +23,10 @@ const App = () => {
   const openModal = () => setModalOpen(true)
   const closeModal = () => setModalOpen(false)
 
-  const changeMeses = (meses) => {
-    setSelectMesesSQL(meses)
+  const changeMeses = ({ fullRange, newValue }) => {
+    const mesesSQL = fullRange.map(mes => `'${mes}'`).join(', ');
+    setSelectMesesSQL(mesesSQL)
+    setSelectedRangeMeses(newValue)
   }
 
   const changeUncheckedZones = (zonas) => {
@@ -409,8 +412,8 @@ const App = () => {
 
   return (
     <div className="app">
-      <div className="abso" style={{ position: 'relative' }}>
-        <div className="rel">
+      <div style={{ position: 'relative' }}>
+        <div className="form">
           <Form />
         </div>
       </div>
@@ -436,6 +439,7 @@ const App = () => {
         selectedZona={selectedZona}
         ventaVolumenes={ventaVolumenes}
         selectMesesSQL={selectMesesSQL}
+        selectedRangeMeses={selectedRangeMeses}
       />}
     </div>
     // loading
