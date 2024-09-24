@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Modal.css';
 
-import { MixedBarChart } from '../chart/MixedBarChart'
+import { MixedBarChart, ColorScale } from '../chart/MixedBarChart'
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Unstable_Grid2';
 import CloseIcon from '@mui/icons-material/Close';
@@ -454,6 +454,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                         <h4 style={{ margin: '0' }}>Volumenes de ventas mes a mes</h4>
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <Grid xs={4}>
+                                                {/* <ColorScale data={volumenesChart.total_venta_neta_acum_un} xLabels={volumenesChart.labels} color={'#CDDE00'}></ColorScale> */}
                                                 <MixedBarChart data={volumenesChart.total_venta_neta_acum_un} xLabels={volumenesChart.labels} color={'#CDDE00'} />
                                                 <div style={{ textAlign: 'center' }}>Unidades</div>
                                             </Grid>
@@ -512,6 +513,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <MixedBarChart data={efectividadVentasChart.data} xLabels={efectividadVentasChart.labels} color={'#CDDE00'} />
+                                            {/* <ColorScale data={efectividadVentasChart.data} xLabels={efectividadVentasChart.labels} color={'#CDDE00'}></ColorScale> */}
                                         </Grid>
                                     </div>
                                 </Grid>
