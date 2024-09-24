@@ -15,13 +15,8 @@ import NavigationIcon from '@mui/icons-material/Navigation';
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Grid from '@mui/material/Unstable_Grid2';
-import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ScaleIcon from '@mui/icons-material/Scale';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
-import { city } from './data.ts';
 import InputSelect from '../input/InputSelect.jsx'
 import DiscreteSlider from '../input/Slider.jsx'
 
@@ -47,25 +42,16 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
 
         sendMessageToIframe({
             codeCity: ciudad,
-            value: city[ciudad]
+            // value: city[ciudad]
         })
     }
 
-    const handleChangeMeses = (meses) => {
-        const mesesSQL = meses.map(mes => `'${mes}'`).join(', ');
-        changeMeses(mesesSQL)
+    const handleChangeMeses = (data) => {
+        changeMeses(data)
     }
 
     const handleCheckbox = (event) => {
         const { id, checked } = event.target
-
-        // if (!checked) {
-        //     setUncheckedZones((prevZones) => [...prevZones, id])
-        //     changeUncheckedZones(uncheckedZones)
-        // } else {
-        //     setUncheckedZones((prevZones) => prevZones.filter(zone => zone !== id))
-        //     changeUncheckedZones(uncheckedZones)
-        // }
 
         if (!checked) {
             setUncheckedZones((prevZones) => {
@@ -122,7 +108,7 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
         (Object.entries(ventaVolumenes).length > 0 && Object.entries(dataCiudad).length > 0) && (
             <Box className="container-box">
                 <div className="controls-header">
-                    <h2>Nutresa - Digital Twin</h2>
+                    <h2>Nutresa - Digital Twins</h2>
                 </div>
 
                 <InputSelect currencies={currencies} handleChangeSelect={handleChangeSelect} defaultValue={'BG'} label={'ciudad'}></InputSelect>
@@ -130,8 +116,6 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                 <div style={{ margin: 20, display: 'flex', justifyContent: 'center' }}>
                     <DiscreteSlider handleChangeMeses={handleChangeMeses}></DiscreteSlider>
                 </div>
-
-                {/* <Box sx={{ padding: '0 20px 20px' }}><strong>Datos a mes de junio</strong></Box> */}
 
                 <Accordion className='accordion-box points' expanded={expanded === 'panel1'} onChange={handleChangeExpanded('panel1')}>
                     <AccordionSummary

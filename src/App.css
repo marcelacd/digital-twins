@@ -42,7 +42,7 @@ body {
   backdrop-filter: blur(6px);
 }
 
-.rel {
+.form {
   /* width: 25%; */
   position: absolute;
   right: 0;
