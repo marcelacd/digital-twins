@@ -7,7 +7,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import CloseIcon from '@mui/icons-material/Close';
 
 function Form() {
@@ -47,7 +47,7 @@ function Form() {
                         <h3>Parametros</h3>
 
                         <Grid container sx={{ margin: '20px 0' }}>
-                            <Grid xs={12}>
+                            <Grid size={12}>
                                 <Box
                                     component="form"
                                     sx={{
@@ -110,7 +110,7 @@ function Form() {
                                 </Box>
                                 <br />
                             </Grid>
-                            <Grid xs={12} sx={{ textAlign: 'center' }}>
+                            <Grid size={12} sx={{ textAlign: 'center' }}>
                                 <Button
                                     sx={{
                                         textTransform: 'none',
