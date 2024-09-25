@@ -5,6 +5,8 @@ import Modal from './components/modal/Modal';
 import './App.css';
 import { executeAthenaQuery } from './services/athenaService.js';
 
+const colors = ['#F9B242', '#3BB6A7', '#CDDE00']
+
 const App = () => {
   // const [loading, setLoading] = useState(true)
   // const [isLoading, setIsLoading] = useState(true)
@@ -96,7 +98,10 @@ const App = () => {
 
       result.push({
         code: zone,
-        height: `${index + 1}00`,
+        height: `200`,
+        color: colors[index],
+
+        // height: `${index + 1}00`,
         flyLocation: {
           // lon: calculate[1],
           // lat: calculate[0],

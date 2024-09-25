@@ -222,20 +222,8 @@ const flyToLocation = (lon, lat, height, heading, pitch, name, duration = 0) => 
     })
 }
 
-const colors = [
-    {
-        color: Cesium.Color.fromCssColorString('#F9B242')
-    },
-    {
-        color: Cesium.Color.fromCssColorString('#3BB6A7')
-    },
-    {
-        color: Cesium.Color.fromCssColorString('#CDDE00')
-    }
-]
-
 // Función reutilizable para crear el polígono
-const createPolygon = (zone, index) => {
+const createPolygon = (zone) => {
     // Convertir las coordenadas de latitud y longitud a Cesium.Cartesian3
     const positions = zone.coordinate.map(coord => Cesium.Cartesian3.fromDegrees(coord[1], coord[0]));
 
@@ -244,8 +232,7 @@ const createPolygon = (zone, index) => {
         polygon: {
             hierarchy: new Cesium.PolygonHierarchy(positions),
             outline: false,
-            material: colors[index].color.withAlpha(0.7),
-            // material: Cesium.Color.fromCssColorString('#F9B242').withAlpha(0.7),
+            material: Cesium.Color.fromCssColorString(zone.color).withAlpha(0.7),
             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
             extrudedHeight: zone.height,
             disableDepthTestDistance: Number.POSITIVE_INFINITY
@@ -256,16 +243,16 @@ const createPolygon = (zone, index) => {
 
 // Pintar todas las zonas
 const addPolygonos = () => {
-    dataByCiudad.zone.forEach((zone, index) => {
-        createPolygon(zone, index)
+    dataByCiudad.zone.forEach((zone) => {
+        createPolygon(zone)
     })
 }
 
 // Pintar una zona específica
 const addPolygon = (typeZona) => {
-    dataByCiudad.zone.forEach((zone, index) => {
+    dataByCiudad.zone.forEach((zone) => {
         if (zone.code === typeZona) {
-            createPolygon(zone, index)
+            createPolygon(zone)
         }
     })
 }

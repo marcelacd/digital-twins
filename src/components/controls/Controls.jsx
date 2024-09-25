@@ -19,7 +19,8 @@ import Checkbox from '@mui/material/Checkbox';
 import InputSelect from '../input/InputSelect.jsx'
 import DiscreteSlider from '../input/Slider.jsx'
 import { alpha, styled } from '@mui/material/styles';
-import { pink } from '@mui/material/colors';
+
+const colors = ['#F9B242', '#3BB6A7', '#CDDE00']
 
 const currencies = [
     {
@@ -37,6 +38,18 @@ const ColorSwitch = styled(Switch)(({ theme }) => ({
     },
     '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
         backgroundColor: '#3BB6A7',
+    },
+    // '& .MuiSwitch-switchBase': {
+        // padding: 6, // Ajusta el tamaño del thumb (el círculo)
+    // },
+    '& .MuiSwitch-thumb': {
+        width: 12,
+        height: 12, // Ajusta el tamaño del círculo
+    },
+    '& .MuiSwitch-track': {
+        borderRadius: 16 / 2,
+        height: 8, // Ajusta la altura del track
+        width: 20, // Ajusta el ancho del track
     },
 }))
 
@@ -142,7 +155,7 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                         </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Grid container rowSpacing={0} >
+                        <Grid container rowSpacing={0} sx={{ alignItems: 'center' }}>
                             {
                                 dataCiudad[ciudad].zone.map((zone, index) => (
                                     <React.Fragment key={index}>
@@ -163,25 +176,13 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                         <Grid size={2}>
                                             <NavigationIcon
                                                 fontSize='small'
-                                                sx={{ cursor: 'pointer', color: '#3BB6A7' }}
+                                                sx={{ cursor: 'pointer', color: colors[index] }}
                                                 onClick={() => handleSwitch({ target: { fly: `${zone.code}` } })}
                                             />
                                         </Grid>
                                         <Grid size={3}>
                                             <FormControlLabel
-                                                // sx={{
-                                                //     fontSize: 14, '& .MuiSwitch-switchBase.Mui-checked': {
-                                                //         color: '#3BB6A7',
-                                                //         '&:hover': {
-                                                //             backgroundColor: (theme) => theme.palette.action.hoverOpacity
-                                                //                 ? alpha('#3BB6A7', theme.palette.action.hoverOpacity)
-                                                //                 : '#3BB6A7', // Asegura que uses alpha correctamente
-                                                //         },
-                                                //     },
-                                                //     '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                                                //         backgroundColor: '#3BB6A7',
-                                                //     },
-                                                // }}
+
                                                 control={<ColorSwitch
                                                     onChange={handleSwitch}
                                                     id={`client${index + 1}`}
