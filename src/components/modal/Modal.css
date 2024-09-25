@@ -19,7 +19,7 @@
     background: white;
     padding: 25px;
     border-radius: 8px;
-    width: 70%;
+    width: 75%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 1001;
 
@@ -34,13 +34,13 @@
     } */
 
     .container {
-      .tabs {
+      /* .tabs {
         margin: 15px 0;
         padding-bottom: 5px;
         font-size: 17px;
         text-align: center;
         border-bottom: 1px solid;
-      }
+      } */
 
       .cart {
         background-color: #3bb6a7;

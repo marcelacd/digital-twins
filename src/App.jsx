@@ -6,9 +6,10 @@ import './App.css';
 import { executeAthenaQuery } from './services/athenaService.js';
 
 const App = () => {
-  const [loading, setLoading] = useState(true)
+  // const [loading, setLoading] = useState(true)
+  // const [isLoading, setIsLoading] = useState(true)
   const [dataCiudad, setDataCiudad] = useState({})
-  const [selectMesesSQL, setSelectMesesSQL] = useState(`'JUN'`)
+  const [selectMesesSQL, setSelectMesesSQL] = useState(`'Junio'`)
   const [selectedRangeMeses, setSelectedRangeMeses] = useState([6, 6])
   const [uncheckedZones, setUncheckedZones] = React.useState([]);
   const [isModalOpen, setModalOpen] = useState(false)
@@ -179,9 +180,11 @@ const App = () => {
       referencias_total: 0,
     })
 
+
+    //Duda, el consolidado es la suma o tambien hay que dividir
     setReferencias({
       data: resultado,
-      consolidado: consolidado.referencias_total
+      consolidado: consolidado.referencias_total / resultado.length
     })
   }
 
@@ -290,7 +293,6 @@ const App = () => {
       try {
         const queryClientes = `SELECT DISTINCT zona, cv_barrio, coord_y, coord_x FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"`
         const queryZonas = `SELECT DISTINCT zona, coord_y, coord_x FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."zonas"`
-        // SELECT DISTINCT zona, coord_y, coord_x FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."zonas" WHERE zona NOT IN ('TDBC Libertador')
 
         const [
           respuestaQueryClientes,
@@ -349,9 +351,8 @@ const App = () => {
                                             FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN (${selectMesesSQL})`
         queryEjePresupuestal = ajustarConsulta(queryEjePresupuestal)
 
-        //Ajustar filtro de meses
         let queryVentasPlaneadas = `SELECT zona, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
-                                      FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra" WHERE mes IN ('Junio')`
+                                      FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra" WHERE mes IN (${selectMesesSQL})`
         queryVentasPlaneadas = ajustarConsulta(queryVentasPlaneadas)
 
         let queryVentasEfectivas = `SELECT zona, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
@@ -360,7 +361,7 @@ const App = () => {
                                       FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
                                       WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                       GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal
-                                      WHERE mes IN ('JUN')`
+                                      WHERE mes IN (${selectMesesSQL})`
         queryVentasEfectivas = ajustarConsulta(queryVentasEfectivas)
 
         const [
@@ -381,8 +382,6 @@ const App = () => {
         transformarDataReferencias(respuestaReferencias)
         transformarDataEjecucionPresupuestal(respuestaEjePresupuestal)
         transformarDataVentasPlanEfec(respuestaVentasPlaneadas, respuestaVentasEfectivas)
-
-        setLoading(false)
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -412,6 +411,7 @@ const App = () => {
 
   return (
     <div className="app">
+
       <div style={{ position: 'relative' }}>
         <div className="form">
           <Form />
@@ -431,7 +431,14 @@ const App = () => {
         />
       </div>
 
-      <iframe className='iframe' src="map/index.html" title="map" width="100%" height="100%" ref={iframeRef}></iframe>
+      <iframe
+        className='iframe'
+        src="map/index.html"
+        title="map"
+        width="100%"
+        height="100%"
+        ref={iframeRef}>
+      </iframe>
 
       {isModalOpen && <Modal
         isOpen={isModalOpen}
@@ -442,46 +449,6 @@ const App = () => {
         selectedRangeMeses={selectedRangeMeses}
       />}
     </div>
-    // loading
-    //   ? (
-    //     <div className="contenedor-loader" >
-    //       Cargando contenido...
-    //       <div>
-    //       <span className="loader"></span>
-    //     </div>
-    //     </div>
-    //   )
-    //   : (
-    //     <div className="app">
-    //       <div className="abso" style={{ position: 'relative' }}>
-    //         <div className="rel">
-    //           <Form />
-    //         </div>
-    //       </div>
-
-    //       <div className="controls">
-    //         <Controls
-    //           sendMessageToIframe={sendMessageToIframe}
-    //           dataCiudad={dataCiudad}
-    //           ventaVolumenes={ventaVolumenes}
-    //           ejecucionPresupuestal={ejecucionPresupuestal}
-    //           referencias={referencias}
-    //           efectividadVentas={efectividadVentas}
-    //           changeMeses={changeMeses}
-    //         />
-    //       </div>
-
-    //       <iframe className='iframe' src="map/index.html" title="map" width="100%" height="100%" ref={iframeRef}></iframe>
-
-    //       {isModalOpen && <Modal
-    //         isOpen={isModalOpen}
-    //         onClose={closeModal}
-    //         selectedZona={selectedZona}
-    //         ventaVolumenes={ventaVolumenes}
-    //         selectMesesSQL={selectMesesSQL}
-    //       />}
-    //     </div>
-    //   )
   )
 }
 

@@ -14,11 +14,12 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import NavigationIcon from '@mui/icons-material/Navigation';
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import Checkbox from '@mui/material/Checkbox';
-
 import InputSelect from '../input/InputSelect.jsx'
 import DiscreteSlider from '../input/Slider.jsx'
+import { alpha, styled } from '@mui/material/styles';
+import { pink } from '@mui/material/colors';
 
 const currencies = [
     {
@@ -26,6 +27,18 @@ const currencies = [
         label: 'Bogota',
     },
 ]
+
+const ColorSwitch = styled(Switch)(({ theme }) => ({
+    '& .MuiSwitch-switchBase.Mui-checked': {
+        color: '#3BB6A7',
+        '&:hover': {
+            backgroundColor: alpha('#3BB6A7', theme.palette.action.hoverOpacity),
+        },
+    },
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+        backgroundColor: '#3BB6A7',
+    },
+}))
 
 function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPresupuestal, referencias, efectividadVentas, changeMeses, changeUncheckedZones }) {
     const [expanded, setExpanded] = React.useState(false);
@@ -55,13 +68,13 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
 
         if (!checked) {
             setUncheckedZones((prevZones) => {
-                const updatedZones = [...prevZones, id];
+                const updatedZones = [...prevZones, id]
                 changeUncheckedZones(updatedZones)
                 return updatedZones
             })
         } else {
             setUncheckedZones((prevZones) => {
-                const updatedZones = prevZones.filter(zone => zone !== id);
+                const updatedZones = prevZones.filter(zone => zone !== id)
                 changeUncheckedZones(updatedZones)
                 return updatedZones
             })
@@ -111,7 +124,7 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                     <h2>Nutresa - Digital Twins</h2>
                 </div>
 
-                <InputSelect currencies={currencies} handleChangeSelect={handleChangeSelect} defaultValue={'BG'} label={'ciudad'}></InputSelect>
+                <InputSelect currencies={currencies} handleChangeSelect={handleChangeSelect} defaultValue={'BG'} label={'Ciudad'}></InputSelect>
 
                 <div style={{ margin: 20, display: 'flex', justifyContent: 'center' }}>
                     <DiscreteSlider handleChangeMeses={handleChangeMeses}></DiscreteSlider>
@@ -133,14 +146,48 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                             {
                                 dataCiudad[ciudad].zone.map((zone, index) => (
                                     <React.Fragment key={index}>
-                                        <Grid xs={7}>
-                                            <FormControlLabel control={<Checkbox defaultChecked onChange={handleCheckbox} id={zone.code} size="small" />} label={zone.code} />
+                                        <Grid size={7}>
+                                            <FormControlLabel
+                                                control={<Checkbox
+                                                    defaultChecked
+                                                    sx={{
+                                                        color: '#3BB6A7',
+                                                        '&.Mui-checked': {
+                                                            color: '#3BB6A7',
+                                                        },
+                                                    }}
+                                                    onChange={handleCheckbox}
+                                                    id={zone.code} size="small"
+                                                />} label={zone.code} />
                                         </Grid>
-                                        <Grid xs={2}>
-                                            <NavigationIcon fontSize='small' color="primary" sx={{ cursor: 'pointer' }} onClick={() => handleSwitch({ target: { fly: `${zone.code}` } })} />
+                                        <Grid size={2}>
+                                            <NavigationIcon
+                                                fontSize='small'
+                                                sx={{ cursor: 'pointer', color: '#3BB6A7' }}
+                                                onClick={() => handleSwitch({ target: { fly: `${zone.code}` } })}
+                                            />
                                         </Grid>
-                                        <Grid xs={3}>
-                                            <FormControlLabel sx={{ fontSize: 14 }} control={<Switch onChange={handleSwitch} id={`client${index + 1}`} size="small" />} label="Clientes" />
+                                        <Grid size={3}>
+                                            <FormControlLabel
+                                                // sx={{
+                                                //     fontSize: 14, '& .MuiSwitch-switchBase.Mui-checked': {
+                                                //         color: '#3BB6A7',
+                                                //         '&:hover': {
+                                                //             backgroundColor: (theme) => theme.palette.action.hoverOpacity
+                                                //                 ? alpha('#3BB6A7', theme.palette.action.hoverOpacity)
+                                                //                 : '#3BB6A7', // Asegura que uses alpha correctamente
+                                                //         },
+                                                //     },
+                                                //     '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                                //         backgroundColor: '#3BB6A7',
+                                                //     },
+                                                // }}
+                                                control={<ColorSwitch
+                                                    onChange={handleSwitch}
+                                                    id={`client${index + 1}`}
+                                                    size="small" />}
+                                                label="Clientes"
+                                            />
                                         </Grid>
                                     </React.Fragment>
                                 ))
@@ -161,45 +208,47 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                         </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                            <Grid>
-                                <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
-                                <Grid container rowSpacing={0.5} columnSpacing={{ xs: 1, sm: 3, md: 4 }}>
-                                    <Grid xs={4}>
-                                        <div>{ventaVolumenes.consolidado.ventas_un.toLocaleString('es-ES') + ' U'}</div>
-                                    </Grid>
-                                    <Grid xs={4}>
-                                        <div>{ventaVolumenes.consolidado.ventas_kg.toLocaleString('es-ES') + ' Kg'}</div>
-                                    </Grid>
-                                    <Grid xs={4}>
-                                        <div>{'$' + ventaVolumenes.consolidado.ventas_eco.toLocaleString('es-ES')}</div>
+                        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ paddingLeft: '10px' }} >
+                            <React.Fragment>
+                                <Grid size={12}>
+                                    <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
+                                    <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
+                                        <Grid size={4}>
+                                            <div>{ventaVolumenes.consolidado.ventas_un.toLocaleString('es-CO') + ' U'}</div>
+                                        </Grid>
+                                        <Grid size={4}>
+                                            <div>{ventaVolumenes.consolidado.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
+                                        </Grid>
+                                        <Grid size={4}>
+                                            <div>{'$' + ventaVolumenes.consolidado.ventas_eco.toLocaleString('es-CO')}</div>
+                                        </Grid>
                                     </Grid>
                                 </Grid>
-                            </Grid>
+                            </React.Fragment>
                         </Grid>
                         <hr />
-                        {
-                            ventaVolumenes.data.map((zona, index) => (
-                                <React.Fragment key={index}>
-                                    <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                        <Grid>
+                        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ paddingLeft: '10px' }}>
+                            {
+                                ventaVolumenes.data.map((zona, index) => (
+                                    <React.Fragment key={index}>
+                                        <Grid size={12}>
                                             <span><strong>{zona.zona}</strong></span>
-                                            <Grid container rowSpacing={0.5} columnSpacing={{ xs: 1, sm: 3, md: 4 }}>
-                                                <Grid xs={4}>
-                                                    <div>{zona.ventas_un.toLocaleString('es-ES') + ' U'}</div>
+                                            <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
+                                                <Grid size={4}>
+                                                    <div>{zona.ventas_un.toLocaleString('es-CO') + ' U'}</div>
                                                 </Grid>
-                                                <Grid xs={4}>
-                                                    <div>{zona.ventas_kg.toLocaleString('es-ES') + ' Kg'}</div>
+                                                <Grid size={4}>
+                                                    <div>{zona.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
                                                 </Grid>
-                                                <Grid xs={4}>
-                                                    <div>{'$' + zona.ventas_eco.toLocaleString('es-ES')}</div>
+                                                <Grid size={4}>
+                                                    <div>{'$' + zona.ventas_eco.toLocaleString('es-CO')}</div>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                    </Grid>
-                                </React.Fragment>
-                            ))
-                        }
+                                    </React.Fragment>
+                                ))
+                            }
+                        </Grid>
                     </AccordionDetails>
                 </Accordion>
 
@@ -215,29 +264,29 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                         </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                            <Grid xs={7}>
+                        <Grid container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ paddingLeft: '10px' }}>
+                            <Grid size={7}>
                                 <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
-                            <Grid xs={5}>
+                            <Grid size={5}>
                                 <div>{`${efectividadVentas.consolidado.toFixed(2)}%`}</div>
                             </Grid>
                         </Grid>
                         <hr />
-                        {
-                            efectividadVentas.data.map((zona, index) => (
-                                <React.Fragment key={index}>
-                                    <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                        <Grid xs={7}>
+                        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ paddingLeft: '10px' }}>
+                            {
+                                efectividadVentas.data.map((zona, index) => (
+                                    <React.Fragment key={index}>
+                                        <Grid size={7}>
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
-                                        <Grid xs={5}>
+                                        <Grid size={5}>
                                             <div>{`${zona.efectividad.toFixed(2)}%`}</div>
                                         </Grid>
-                                    </Grid>
-                                </React.Fragment>
-                            ))
-                        }
+                                    </React.Fragment>
+                                ))
+                            }
+                        </Grid>
                     </AccordionDetails>
                 </Accordion>
 
@@ -254,28 +303,28 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                     </AccordionSummary>
                     <AccordionDetails>
                         <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                            <Grid xs={7}>
+                            <Grid size={7}>
                                 <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
-                            <Grid xs={5}>
-                                {referencias.consolidado.toLocaleString('es-ES')}
+                            <Grid size={5}>
+                                {referencias.consolidado.toLocaleString('es-CO')}
                             </Grid>
                         </Grid>
                         <hr />
-                        {
-                            referencias.data.map((zona, index) => (
-                                <React.Fragment key={index}>
-                                    <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                        <Grid xs={7}>
+                        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ paddingLeft: '10px' }}>
+                            {
+                                referencias.data.map((zona, index) => (
+                                    <React.Fragment key={index}>
+                                        <Grid size={7}>
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
-                                        <Grid xs={5}>
-                                            {zona.referencias_total.toLocaleString('es-ES') + ' por cliente'}
+                                        <Grid size={5}>
+                                            {zona.referencias_total.toLocaleString('es-CO') + ' por cliente'}
                                         </Grid>
-                                    </Grid>
-                                </React.Fragment>
-                            ))
-                        }
+                                    </React.Fragment>
+                                ))
+                            }
+                        </Grid>
                     </AccordionDetails>
                 </Accordion>
 
@@ -291,29 +340,29 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                         </div>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                            <Grid xs={7}>
+                        <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ paddingLeft: '10px' }}>
+                            <Grid size={7}>
                                 <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
-                            <Grid xs={5}>
+                            <Grid size={5}>
                                 <div>{`${ejecucionPresupuestal.consolidado.toFixed(2)}%`}</div>
                             </Grid>
                         </Grid>
                         <hr />
-                        {
-                            ejecucionPresupuestal.data.map((zona, index) => (
-                                <React.Fragment key={index}>
-                                    <Grid sx={{ paddingLeft: '10px' }} container rowSpacing={2} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                        <Grid xs={7}>
+                        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }} sx={{ paddingLeft: '10px' }}>
+                            {
+                                ejecucionPresupuestal.data.map((zona, index) => (
+                                    <React.Fragment key={index}>
+                                        <Grid size={7}>
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
-                                        <Grid xs={5}>
+                                        <Grid size={5}>
                                             <div>{`${zona.ejecucion_presupuestal.toFixed(2)}%`}</div>
                                         </Grid>
-                                    </Grid>
-                                </React.Fragment>
-                            ))
-                        }
+                                    </React.Fragment>
+                                ))
+                            }
+                        </Grid>
                     </AccordionDetails>
                 </Accordion>
             </Box>

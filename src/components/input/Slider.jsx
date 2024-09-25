@@ -3,18 +3,18 @@ import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 
 const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
+    { value: 1, label: 'Enero' },
+    { value: 2, label: 'Febrero' },
+    { value: 3, label: 'Marzo' },
     { value: 4, label: 'Abril' },
     { value: 5, label: 'Mayo' },
     { value: 6, label: 'Junio' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
+    { value: 7, label: 'Julio' },
+    { value: 8, label: 'Agosto' },
+    { value: 9, label: 'Septiembre' },
+    { value: 10, label: 'Octubre' },
+    { value: 11, label: 'Noviembre' },
+    { value: 12, label: 'Diciembre' },
 ];
 
 function valuetext(value) {
@@ -27,18 +27,18 @@ export default function RangeSlider({ handleChangeMeses }) {
 
     const handleChange = (event, newValue) => {
         const convertir = {
-            1: 'ENE',
-            2: 'FEB',
-            3: 'MAR',
-            4: 'ABR',
-            5: 'MAY',
-            6: 'JUN',
-            7: 'JUL',
-            8: 'AGO',
-            9: 'SEP',
-            10: 'OCT',
-            11: 'NOV',
-            12: 'DIC',
+            1: 'Enero',
+            2: 'Febrero',
+            3: 'Marzo',
+            4: 'Abril',
+            5: 'Mayo',
+            6: 'Junio',
+            7: 'Julio',
+            8: 'Agosto',
+            9: 'Septiembre',
+            10: 'Octubre',
+            11: 'Noviembre',
+            12: 'Ddiciembre',
         }
 
         const fullRange = []
@@ -67,6 +67,18 @@ export default function RangeSlider({ handleChangeMeses }) {
                     marks={months}
                     // marks// Show all months
                     getAriaLabel={getAriaLabel} // Aria label based on month names
+                    sx={{
+                        '& .MuiSlider-thumb': {
+                            color: '#3BB6A7',
+                        },
+                        '& .MuiSlider-track': {
+                            backgroundColor: '#3BB6A7',
+                            border: 'none'
+                        },
+                        '& .MuiSlider-rail': {
+                            backgroundColor: '#3BB6A7',
+                        },
+                    }}
                 />
                 <hr />
                 <div style={{ marginTop: 20 }}><strong>
