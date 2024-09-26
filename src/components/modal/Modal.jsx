@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MixedBarChart, ColorScale } from '../chart/MixedBarChart'
+import { StackedBarChart } from '../chart/MixedBarChart'
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid2';
 import CloseIcon from '@mui/icons-material/Close';
@@ -27,7 +27,7 @@ const months = [
     { value: 10, label: 'Octubre' },
     { value: 11, label: 'Noviembre' },
     { value: 12, label: 'Diciembre' },
-];
+]
 
 function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMeses }) {
     const [isLoading, setIsLoading] = useState(true)
@@ -48,120 +48,66 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
     }
 
     function transformarDataVolumenes(data) {
-        const headers = data[0]
-
-        // Convertir los datos en objetos
-        const resultado = data.slice(1).map(row => {
-            return headers.reduce((obj, header, index) => {
-                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-                return obj
-            }, {})
-        })
+        const resultado = convertirDataObjetos(data, 'zona')
         setVentaVolumenes(resultado[0])
     }
     function transformarDataVolumenesChart(data) {
-        const headers = data[0]
-
-        // Convertir los datos en objetos
-        const resultado = data.slice(1).map(row => {
-            return headers.reduce((obj, header, index) => {
-                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index]);
-                return obj
-            }, {})
-        })
+        const resultado = convertirDataObjetos(data, 'mes')
 
         // Ordenar los objetos basados en el orden de los meses
         const sortedResultado = resultado.sort((a, b) => {
-            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0);
+            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0)
         })
+
         const organizedData = {
-            labels: sortedResultado.map(item => item.mes),
-            ventas_eco: sortedResultado.map(item => item.ventas_eco),
-            ventas_kg: sortedResultado.map(item => item.ventas_kg),
-            ventas_un: sortedResultado.map(item => item.ventas_un),
+            labels: [...new Set(sortedResultado.map(item => item.mes))],
+            ventas_un: formatearData(sortedResultado, 'ventas_un'),
+            ventas_kg: formatearData(sortedResultado, 'ventas_kg'),
+            ventas_eco: formatearData(sortedResultado, 'ventas_eco')
         }
         setVolumenesChart(organizedData)
     }
 
     function transformarDataEjePresupuestal(data) {
-        const headers = data[0]
-
-        // Convertir los datos en objetos
-        const resultado = data.slice(1).map(row => {
-            return headers.reduce((obj, header, index) => {
-                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-                return obj
-            }, {})
-        })
+        const resultado = convertirDataObjetos(data, 'zona')
         setEjecucionPresupuestal(resultado[0])
     }
     function transformarDataEjePresupuestalChart(data) {
-        const headers = data[0]
-
-        // Convertir los datos en objetos
-        const resultado = data.slice(1).map(row => {
-            return headers.reduce((obj, header, index) => {
-                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index]);
-                return obj;
-            }, {});
-        });
+        const resultado = convertirDataObjetos(data, 'mes')
 
         // Ordenar los objetos basados en el orden de los meses
         const sortedResultado = resultado.sort((a, b) => {
             return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0);
         })
+
         const organizedData = {
-            labels: sortedResultado.map(item => item.mes),
-            data: sortedResultado.map(item => item.ejecucion_presupuestal.toFixed(2)),
+            labels: [...new Set(sortedResultado.map(item => item.mes))],
+            data: formatearData(sortedResultado, 'ejecucion_presupuestal'),
         }
         setEjecucionPresupuestalChart(organizedData)
     }
 
     function transformarDataReferencias(data) {
-        const headers = data[0]
-
-        // Convertir los datos en objetos
-        const resultado = data.slice(1).map(row => {
-            return headers.reduce((obj, header, index) => {
-                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-                return obj
-            }, {})
-        })
+        const resultado = convertirDataObjetos(data, 'zona')
         setReferencias(resultado[0])
     }
     function transformarDataTotalClientes(data) {
-        const headers = data[0]
-
-        // Convertir los datos en objetos
-        const resultado = data.slice(1).map(row => {
-            return headers.reduce((obj, header, index) => {
-                obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-                return obj
-            }, {})
-        })
+        const resultado = convertirDataObjetos(data, 'zona')
         setTotalClientes(resultado[0])
     }
     function transformarDataReferenciasChart(data) {
+        const resultado = convertirDataObjetos(data, 'mes')
 
-        // Referencias
-        const headers = data[0]
-        // Convertir los datos en objetos
-        const referenciasChart = data.slice(1).map(row => {
-            return headers.reduce((obj, header, index) => {
-                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index]);
-                return obj
-            }, {})
-        });
         // Ordenar los objetos basados en el orden de los meses
-        const sortedResultado = referenciasChart.sort((a, b) => {
-            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0);
+        const sortedResultado = resultado.sort((a, b) => {
+            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0)
         })
 
-        const organizedDataReferencias = {
-            labels: sortedResultado.map(item => item.mes),
-            data: sortedResultado.map(item => item.referencias_total),
+        const organizedData = {
+            labels: [...new Set(sortedResultado.map(item => item.mes))],
+            data: formatearData(sortedResultado, 'referencias_total'),
         }
-        setReferenciasChart(organizedDataReferencias)
+        setReferenciasChart(organizedData)
     }
 
     function transformarDataEfectividad(vPlaneadas, vEfectivas) {
@@ -177,50 +123,88 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
         setEfectividadVentas(organizedData)
     }
     function transformarDataEfectividadChart(vPlaneadas, vEfectivas) {
-        const headersPlan = vPlaneadas[0]
-        const resultadoPlan = vPlaneadas.slice(1).map(row => {
-            return headersPlan.reduce((obj, header, index) => {
-                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index])
-                return obj
-            }, {})
-        })
+        const resultadoPlan = convertirDataObjetos(vPlaneadas, 'mes')
+        const resultadoEfe = convertirDataObjetos(vEfectivas, 'mes')
 
-        const headersEfe = vEfectivas[0]
-        // Convertir los datos en objetos
-        const resultadoEfe = vEfectivas.slice(1).map(row => {
-            return headersEfe.reduce((obj, header, index) => {
-                obj[header] = header === 'mes' ? row[index] : parseFloat(row[index])
-                return obj
-            }, {})
-        })
-
-        //Sacar el promedio de efectividad
-        const efectividadVentas = resultadoPlan.map(resPlan => {
-            const resEfe = resultadoEfe.find(r => r.mes === resPlan.mes);
-            if (resEfe) {
-                return {
-                    mes: resPlan.mes,
-                    efectividad: (resEfe.ventas_efectivas_mensual / resPlan.ventas_planeadas_mensual) * 100
-                }
-            }
-            return null;
-        }).filter(item => item !== null)
+        const promedioEfectividadVentas = calcularEfectividad(resultadoPlan, resultadoEfe)
 
         // Ordenar los objetos basados en el orden de los meses
-        const sortedResultado = efectividadVentas.sort((a, b) => {
+        const sortedResultado = promedioEfectividadVentas.sort((a, b) => {
             return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0)
         })
 
         const organizedData = {
-            labels: sortedResultado.map(item => item.mes),
-            data: sortedResultado.map(item => item.efectividad),
+            labels: [...new Set(sortedResultado.map(item => item.mes))],
+            data: formatearData(sortedResultado, 'efectividad'),
         }
         setEfectividadVentasChart(organizedData)
     }
 
+    const convertirDataObjetos = (data, field) => {
+        // Convertir los datos en objetos
+        const resultado = data.slice(1).map(row => {
+            return data[0].reduce((obj, header, index) => {
+                const specialHeaders = [field, 'vendedor_ecom', 'r_id_vendedor']
+
+                if (specialHeaders.includes(header)) {
+                    obj[header] = row[index]
+                } else {
+                    obj[header] = parseFloat(row[index])
+                }
+
+                return obj
+            }, {})
+        })
+        return resultado
+    }
+
+    const formatearData = (data, field) => {
+        const groupedData = {}
+
+        // Obtener los meses únicos en el orden en que aparecen en la data
+        const meses = [...new Set(data.map(item => item.mes))]
+
+        // Recorrer cada elemento de la data
+        data.forEach(item => {
+            const vendedor = item.vendedor_ecom
+            const ventas = item[field]
+            const mes = item.mes
+
+            // Si no existe el vendedor en groupedData, inicializarlo con el label y un array vacío con longitud igual a los meses
+            if (!groupedData[vendedor]) {
+                groupedData[vendedor] = { label: `Vendedor ${vendedor}`, data: Array(meses.length).fill(0) };
+            }
+
+            // Encontrar el índice del mes actual
+            const indexMes = meses.indexOf(mes)
+
+            // Asignar las ventas en el índice correspondiente al mes
+            groupedData[vendedor].data[indexMes] = ventas
+        })
+
+        return Object.values(groupedData)
+    }
+
+    // Método para calcular la efectividad
+    const calcularEfectividad = (planeadas, efectivas) => {
+        const valor = 1379;
+        return efectivas.map(efectiva => {
+            const plan = planeadas.find(planeada => planeada.mes === efectiva.mes && planeada.r_id_vendedor === efectiva.vendedor_ecom);
+
+            const ventasPlaneadas = plan ? plan.ventas_planeadas_mensual : valor;
+            const efectividad = (efectiva.ventas_efectivas_mensual / ventasPlaneadas) * 100;
+
+            return {
+                mes: efectiva.mes,
+                vendedor_ecom: efectiva.vendedor_ecom,
+                efectividad: efectividad
+            }
+        })
+    }
+
     function valuetext(value) {
-        const month = months.find(month => month.value === value);
-        return month ? month.label : '';
+        const month = months.find(month => month.value === value)
+        return month ? month.label : ''
     }
 
     // Ejecuta la query cuando se abre el modal
@@ -236,44 +220,39 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                         FROM "digital-twins-nutresa-glue-db"."ventas" 
                                         WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' 
                                         GROUP BY zona`
-                // const queryVolumenesChart1 = `SELECT mes,  
-                //                         SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco,
-                //                         SUM(venta_neta_acum_ano_actual_kg) AS ventas_kg,
-                //                         SUM(venta_neta_acum_ano_actual_un) AS ventas_un
-                //                         FROM "digital-twins-nutresa-glue-db"."ventas" WHERE zona = '${selectedZona}' GROUP BY mes`;
 
-                const queryVolumenesChart = `SELECT mes,  
+                const queryVolumenesChart = `SELECT mes, vendedor_ecom,
                                                 SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco,
                                                 SUM(venta_neta_acum_ano_actual_kg) AS ventas_kg,
                                                 SUM(venta_neta_acum_ano_actual_un) AS ventas_un
                                             FROM (
-                                                SELECT mes, 
+                                                SELECT mes, vendedor_ecom,
                                                     venta_neta_acum_ano_actual_eco,
                                                     venta_neta_acum_ano_actual_kg,
                                                     venta_neta_acum_ano_actual_un
                                                 FROM "digital-twins-nutresa-glue-db"."ventas" WHERE zona = '${selectedZona}'
                                                 UNION ALL
-                                                SELECT mes, 
+                                                SELECT mes, vendedor_ecom,
                                                     venta_neta_acum_ano_actual_eco,
                                                     venta_neta_acum_ano_actual_kg,
                                                     venta_neta_acum_ano_actual_un
                                                 FROM "digital-twins-nutresa-glue-db"."prediccion" WHERE zona = '${selectedZona}'
-                                            ) AS consolidated_data GROUP BY mes`
+                                            ) AS consolidated_data GROUP BY mes, vendedor_ecom`
 
                 //Ejecucion presupuestal
                 const queryEjePresupuestal = `SELECT zona, SUM(ppto_neta_acum_ano_actual_eco) AS ppto, SUM(venta_neta_acum_ano_actual_eco) AS ventas
                                               FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' GROUP BY zona;`
                 // const queryEjePresupuestalChart = `SELECT mes, (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
                 //                                    FROM "digital-twins-nutresa-glue-db"."ventas" WHERE zona = '${selectedZona}' GROUP BY mes`;
-                const queryEjePresupuestalChart = `SELECT mes, 
+                const queryEjePresupuestalChart = `SELECT mes, vendedor_ecom,
                                                         (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
                                                     FROM "digital-twins-nutresa-glue-db"."ventas"  
-                                                    WHERE zona = '${selectedZona}' GROUP BY mes
+                                                    WHERE zona = '${selectedZona}' GROUP BY mes, vendedor_ecom
                                                     UNION ALL
-                                                    SELECT mes, 
+                                                    SELECT mes, vendedor_ecom,
                                                         (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
                                                     FROM "digital-twins-nutresa-glue-db"."prediccion"
-                                                    WHERE zona = '${selectedZona}' GROUP BY mes`
+                                                    WHERE zona = '${selectedZona}' GROUP BY mes, vendedor_ecom`
 
                 //Referencias
                 const queryReferencias = `SELECT zona, SUM(conteo_referencias) AS referencias_total
@@ -296,7 +275,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                 //                            WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                 //                            GROUP BY mes, zona, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor
                 //                                WHERE zona = '${selectedZona}' GROUP BY mes`
-                const queryReferenciasChart = `SELECT mes, AVG(conteo_referencias) AS referencias_total
+                const queryReferenciasChart = `SELECT mes, vendedor_ecom, AVG(conteo_referencias) AS referencias_total
                                                 FROM (
                                                     SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
                                                     FROM (
@@ -306,9 +285,9 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     ) AS ventas_distintivas
                                                     GROUP BY mes, zona, vendedor_ecom, nombre_comercial
                                                 ) AS referencias_por_cliente_vendedor
-                                                WHERE zona = '${selectedZona}'GROUP BY mes
+                                                WHERE zona = '${selectedZona}'GROUP BY mes, vendedor_ecom
                                                 UNION ALL
-                                                SELECT mes, AVG(conteo_referencias) AS referencias_total
+                                                SELECT mes, vendedor_ecom, AVG(conteo_referencias) AS referencias_total
                                                 FROM (
                                                     SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
                                                     FROM (
@@ -318,7 +297,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     ) AS ventas_distintivas
                                                     GROUP BY mes, zona, vendedor_ecom, nombre_comercial
                                                 ) AS referencias_por_cliente_vendedor
-                                                WHERE zona = '${selectedZona}' GROUP BY mes`
+                                                WHERE zona = '${selectedZona}' GROUP BY mes, vendedor_ecom`
 
                 //Efectividad
                 const queryVentasPlaneadas = `SELECT zona, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
@@ -331,16 +310,16 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                 WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                                 WHERE zona = '${selectedZona}' AND mes IN (${selectMesesSQL}) GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY zona`
                 //Falta la data planeada para los meses de prediccion
-                const queryVentasPlaneadasChart = `SELECT mes, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
+                const queryVentasPlaneadasChart = `SELECT mes, r_id_vendedor, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
                                               FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"
-                                              WHERE zona = '${selectedZona}' GROUP BY mes`
+                                              WHERE zona = '${selectedZona}' GROUP BY mes, r_id_vendedor`
                 // const queryVentasEfectivasChart = `SELECT mes, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
                 //                                 SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
                 //                                 FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
                 //                                 FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
                 //                                 WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                 //                                 WHERE zona = '${selectedZona}' GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY mes`
-                const queryVentasEfectivasChart = `SELECT mes, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual 
+                const queryVentasEfectivasChart = `SELECT mes, vendedor_ecom, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual 
                                                     FROM (
                                                         SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
                                                         FROM (
@@ -350,9 +329,9 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                         ) AS ventas_distintivas
                                                         WHERE zona = '${selectedZona}' 
                                                         GROUP BY mes, zona, vendedor_ecom
-                                                    ) AS ventas_semanal  GROUP BY mes
+                                                    ) AS ventas_semanal  GROUP BY mes, vendedor_ecom
                                                     UNION ALL
-                                                    SELECT mes, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual 
+                                                    SELECT mes, vendedor_ecom, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual 
                                                     FROM (
                                                         SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
                                                         FROM (
@@ -362,7 +341,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                         ) AS ventas_distintivas
                                                         WHERE zona = '${selectedZona}' 
                                                         GROUP BY mes, zona, vendedor_ecom
-                                                    ) AS ventas_semanal GROUP BY mes`
+                                                    ) AS ventas_semanal GROUP BY mes, vendedor_ecom`
 
                 const [
                     respuestaVolumenes,
@@ -417,7 +396,10 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
     return (
         <div className="modal-overlay" style={{ position: 'absolute' }}>
             {isLoading ? (
-                <span className="loader"></span>
+                <>
+                    {/* <div>Predicting data</div> */}
+                    <span className="loader"></span>
+                </>
             ) : (
                 <div className="modal-content">
 
@@ -489,7 +471,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                 </Grid>
                                 <Grid size={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                        <h4 style={{ margin: '0' }}>Volumenes de ventas mes a mes</h4>
+                                        <h4 style={{ margin: '0' }}>Volumen de ventas mes a mes por vendedor</h4>
 
                                         <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
                                             {/* {dataPieVolumen.map((item, index) => ( */}
@@ -522,40 +504,69 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <Grid size={4}>
-                                                {/* <MixedBarChart data={volumenesChart.ventas_un} xLabels={volumenesChart.labels} color={'#CDDE00'} /> */}
-                                                <ColorScale
+                                                <StackedBarChart
                                                     data={volumenesChart.ventas_un}
                                                     xLabels={volumenesChart.labels}
                                                     colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={' unidades'}
                                                     marginLeft={70}
                                                     translateX={-30}
-                                                ></ColorScale>
+                                                />
                                             </Grid>
-
                                             <Grid size={4}>
-                                                {/* <MixedBarChart data={volumenesChart.ventas_kg} xLabels={volumenesChart.labels} color={'#3BB6A7'} /> */}
-                                                <ColorScale
+                                                <StackedBarChart
                                                     data={volumenesChart.ventas_kg}
                                                     xLabels={volumenesChart.labels}
                                                     colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={' kilogramos'}
                                                     marginLeft={60}
                                                     translateX={-20}
-                                                ></ColorScale>
+                                                />
                                             </Grid>
-
                                             <Grid size={4}>
-                                                {/* <MixedBarChart data={volumenesChart.ventas_eco} xLabels={volumenesChart.labels} color={'#F9B242'} /> */}
-                                                <ColorScale
+                                                <StackedBarChart
                                                     data={volumenesChart.ventas_eco}
                                                     xLabels={volumenesChart.labels}
                                                     colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={'pesos'}
                                                     marginLeft={100}
                                                     translateX={-60}
-                                                ></ColorScale>
+                                                />
                                             </Grid>
+                                            {/* <>
+                                                <Grid size={4}>
+                                                    <ColorScale
+                                                        data={volumenesChart.ventas_un}
+                                                        xLabels={volumenesChart.labels}
+                                                        colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
+                                                        tooltip={' unidades'}
+                                                        marginLeft={70}
+                                                        translateX={-30}
+                                                    ></ColorScale>
+                                                </Grid>
+
+                                                <Grid size={4}>
+                                                    <ColorScale
+                                                        data={volumenesChart.ventas_kg}
+                                                        xLabels={volumenesChart.labels}
+                                                        colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
+                                                        tooltip={' kilogramos'}
+                                                        marginLeft={60}
+                                                        translateX={-20}
+                                                    ></ColorScale>
+                                                </Grid>
+
+                                                <Grid size={4}>
+                                                    <ColorScale
+                                                        data={volumenesChart.ventas_eco}
+                                                        xLabels={volumenesChart.labels}
+                                                        colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
+                                                        tooltip={'pesos'}
+                                                        marginLeft={100}
+                                                        translateX={-60}
+                                                    ></ColorScale>
+                                                </Grid>
+                                            </> */}
                                         </Grid>
                                     </div>
                                 </Grid>
@@ -599,7 +610,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                         <h4 style={{ margin: '0' }}>Efectividad de ventas mes a mes</h4>
 
                                         <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
-                                            {/* {dataPieVolumen.map((item, index) => ( */}
                                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                                                 <div style={{
                                                     width: '18px',
@@ -624,17 +634,15 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     fontSize: '14px'
                                                 }}>Data predictiva</span>
                                             </div>
-                                            {/* ))} */}
                                         </div>
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                            {/* <MixedBarChart data={efectividadVentasChart.data} xLabels={efectividadVentasChart.labels} color={'#CDDE00'} /> */}
-                                            <ColorScale
+                                            <StackedBarChart
                                                 data={efectividadVentasChart.data}
                                                 xLabels={efectividadVentasChart.labels}
                                                 colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                 tooltip={'%'}
-                                            ></ColorScale>
+                                            />
                                         </Grid>
                                     </div>
                                 </Grid>
@@ -672,7 +680,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                         <h4 style={{ margin: '0' }}>Promedio de referencias vendidas por cliente mes a mes</h4>
 
                                         <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
-                                            {/* {dataPieVolumen.map((item, index) => ( */}
                                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                                                 <div style={{
                                                     width: '18px',
@@ -697,17 +704,15 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     fontSize: '14px'
                                                 }}>Data predictiva</span>
                                             </div>
-                                            {/* ))} */}
                                         </div>
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                            {/* <MixedBarChart data={referenciasChart.data} xLabels={referenciasChart.labels} color={'#F9B242'} /> */}
-                                            <ColorScale
+                                            <StackedBarChart
                                                 data={referenciasChart.data}
                                                 xLabels={referenciasChart.labels}
                                                 colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                 tooltip={' por cliente'}
-                                            ></ColorScale>
+                                            />
                                         </Grid>
                                     </div>
                                 </Grid>
@@ -745,7 +750,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                         <h4 style={{ margin: '0' }}>Promedio ejecución presupuestal mes a mes</h4>
 
                                         <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
-                                            {/* {dataPieVolumen.map((item, index) => ( */}
                                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                                                 <div style={{
                                                     width: '18px',
@@ -770,17 +774,15 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     fontSize: '14px'
                                                 }}>Data predictiva</span>
                                             </div>
-                                            {/* ))} */}
                                         </div>
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                                            {/* <MixedBarChart data={ejecucionPresupuestalChart.data} xLabels={ejecucionPresupuestalChart.labels} color={'#CDDE00'} /> */}
-                                            <ColorScale
+                                            <StackedBarChart
                                                 data={ejecucionPresupuestalChart.data}
                                                 xLabels={ejecucionPresupuestalChart.labels}
                                                 colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                 tooltip={'%'}
-                                            ></ColorScale>
+                                            />
                                         </Grid>
                                     </div>
                                 </Grid>
