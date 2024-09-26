@@ -9,29 +9,48 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
 import CloseIcon from '@mui/icons-material/Close';
+import enviarDatos from '../../services/amazonAws'
+import Swal from 'sweetalert2'
 
 function Form() {
-    // Estado para controlar si el contenido está desplegado o no
-    const [isOpen, setIsOpen] = useState(false);
-    const [vendedores, setVendedores] = useState();
+    const [isOpen, setIsOpen] = useState(false)
+    const [vendedores, setVendedores] = useState()
+    const [isLoading, setIsLoading] = useState(false)
 
-    // Función para manejar el cambio del input
     const handleInputChange = (event) => {
-        console.log(event)
-        setVendedores(event.target.value);
-    };
+        setVendedores(event.target.value)
+    }
 
-    // Función para manejar el clic del botón
-    const handleButtonClick = () => {
-        console.log(vendedores)
-        // Aquí puedes enviar el valor capturado (vendedores) a una API o manejarlo como necesites
-    };
+    const handleButtonClick = async () => {
+        setIsLoading(true)
 
-    // Función para manejar el clic en el ícono
+        const data = { "vendedores": vendedores }
+        const response = await enviarDatos(data);
+
+        if (response) {
+            setIsLoading(false)
+
+            Swal.fire({
+                icon: "error",
+                text: "Error enviando el parametro!",
+            })
+            // console.log('Ocurrió un error:', response.error)
+        } else {
+            setIsLoading(false)
+            setIsOpen(!isOpen)
+
+            Swal.fire({
+                icon: "success",
+                text: "Parametro enviado correctamente!!",
+            })
+            // console.log('Datos enviados exitosamente:', response)
+        }
+    }
+
     const toggleOpen = () => {
-        setVendedores();
-        setIsOpen(!isOpen);
-    };
+        setVendedores()
+        setIsOpen(!isOpen)
+    }
 
     return (
         <div className={`container-bo ${isOpen ? 'open' : ''}`} >
@@ -39,7 +58,7 @@ function Form() {
             <Box>
                 <div className="controls-heade">
                     <IconButton onClick={toggleOpen}>
-                        {isOpen ? <ChevronRightIcon  /> : <ChevronLeftIcon/>}
+                        {isOpen ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                     </IconButton>
                 </div>
                 {isOpen && (
@@ -113,6 +132,9 @@ function Form() {
                             <Grid size={12} sx={{ textAlign: 'center' }}>
                                 <Button
                                     sx={{
+                                        // width: '70%',
+                                        width: '100px',
+                                        height: '40px',
                                         textTransform: 'none',
                                         backgroundColor: '#009877',
                                         '&:hover': {
@@ -127,10 +149,9 @@ function Form() {
                                     variant="contained"
                                     onClick={handleButtonClick}
                                     disabled={!vendedores}
-                                >Actualizar</Button>
+                                > {isLoading ? <span className="loader-btn"></span> : 'Actualizar'}</Button>
                             </Grid>
                         </Grid>
-
                     </div>
                 )}
             </Box>

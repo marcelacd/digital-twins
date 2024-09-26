@@ -1,23 +1,19 @@
-/* 
-
-.container-bo {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px;
-}
-
-.controls-header {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-}
-
-.content {
-    margin-top: 10px;
-}
- */
-
-/* .open {
-  width: 20%;
-} */
+.loader-btn {
+    width: 25px;
+    height: 25px;
+    border: 5px solid #fff;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+  }
+  
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }

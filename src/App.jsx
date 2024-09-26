@@ -8,7 +8,6 @@ import { executeAthenaQuery } from './services/athenaService.js';
 const colors = ['#F9B242', '#3BB6A7', '#CDDE00']
 
 const App = () => {
-  // const [loading, setLoading] = useState(true)
   // const [isLoading, setIsLoading] = useState(true)
   const [dataCiudad, setDataCiudad] = useState({})
   const [selectMesesSQL, setSelectMesesSQL] = useState(`'Junio'`)
@@ -138,17 +137,8 @@ const App = () => {
     return zoneMap
   }
 
-
   function transformarDataVolumenes(data) {
-    const headers = data[0]
-
-    // Convertir los datos en objetos
-    const resultado = data.slice(1).map(row => {
-      return headers.reduce((obj, header, index) => {
-        obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-        return obj
-      }, {})
-    })
+    const resultado = convertirDataObjetos(data, 'zona')
 
     const consolidado = resultado.reduce((acumulador, item) => {
       acumulador.ventas_kg += item.ventas_kg;
@@ -166,17 +156,8 @@ const App = () => {
       consolidado
     })
   }
-
   function transformarDataReferencias(data) {
-    const headers = data[0]
-
-    // Convertir los datos en objetos
-    const resultado = data.slice(1).map(row => {
-      return headers.reduce((obj, header, index) => {
-        obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-        return obj
-      }, {})
-    })
+    const resultado = convertirDataObjetos(data, 'zona')
 
     const consolidado = resultado.reduce((acumulador, item) => {
       acumulador.referencias_total += item.referencias_total;
@@ -185,24 +166,13 @@ const App = () => {
       referencias_total: 0,
     })
 
-
-    //Duda, el consolidado es la suma o tambien hay que dividir
     setReferencias({
       data: resultado,
       consolidado: consolidado.referencias_total / resultado.length
     })
   }
-
   function transformarDataEjecucionPresupuestal(data) {
-    const headers = data[0]
-
-    // Convertir los datos en objetos
-    const resultado = data.slice(1).map(row => {
-      return headers.reduce((obj, header, index) => {
-        obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-        return obj
-      }, {})
-    })
+    const resultado = convertirDataObjetos(data, 'zona')
 
     const consolidado = resultado.reduce((acumulador, item) => {
       acumulador.ejecucion_presupuestal_total += item.ejecucion_presupuestal;
@@ -219,30 +189,13 @@ const App = () => {
       consolidado: promedioEjecucion
     })
   }
-
   function transformarDataVentasPlanEfec(vPlaneadas, vEfectivas) {
-    const headersPlan = vPlaneadas[0]
-    // Convertir los datos en objetos
-    const resultadoPlan = vPlaneadas.slice(1).map(row => {
-      return headersPlan.reduce((obj, header, index) => {
-        obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-        return obj
-      }, {})
-    })
-
-    const headersEfe = vEfectivas[0]
-    // Convertir los datos en objetos
-    const resultadoEfe = vEfectivas.slice(1).map(row => {
-      return headersEfe.reduce((obj, header, index) => {
-        obj[header] = header === 'zona' ? row[index] : parseFloat(row[index])
-        return obj
-      }, {})
-    })
+    const resultadoPlan = convertirDataObjetos(vPlaneadas, 'zona')
+    const resultadoEfe = convertirDataObjetos(vEfectivas, 'zona')
 
     //Sacar el promedio de efectividad
     const efectividadVentas = resultadoPlan.map(resPlan => {
       const resEfe = resultadoEfe.find(r => r.zona === resPlan.zona);
-
       if (resEfe) {
         return {
           zona: resPlan.zona,
@@ -267,6 +220,18 @@ const App = () => {
       data: efectividadVentas,
       consolidado: promedioEfectividad
     })
+  }
+
+  const convertirDataObjetos = (data, field) => {
+    // Convertir los datos en objetos
+    const resultado = data.slice(1).map(row => {
+      return data[0].reduce((obj, header, index) => {
+        obj[header] = header === field ? row[index] : parseFloat(row[index])
+        return obj
+      }, {})
+    })
+
+    return resultado
   }
 
   function ajustarConsulta(queryBase) {
@@ -394,7 +359,6 @@ const App = () => {
     fetchData()
 
   }, [selectMesesSQL, uncheckedZones])
-
 
   // useEffect para enviar la data al iframe una vez que dataCiudad cambie
   useEffect(() => {
