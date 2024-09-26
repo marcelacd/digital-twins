@@ -27,7 +27,7 @@ function Form() {
         const data = { "vendedores": vendedores }
         const response = await enviarDatos(data);
 
-        if (response) {
+        if (response.error) {
             setIsLoading(false)
 
             Swal.fire({
