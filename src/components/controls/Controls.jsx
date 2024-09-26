@@ -39,9 +39,6 @@ const ColorSwitch = styled(Switch)(({ theme }) => ({
     '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
         backgroundColor: '#3BB6A7',
     },
-    // '& .MuiSwitch-switchBase': {
-        // padding: 6, // Ajusta el tamaño del thumb (el círculo)
-    // },
     '& .MuiSwitch-thumb': {
         width: 12,
         height: 12, // Ajusta el tamaño del círculo
@@ -308,7 +305,7 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                 <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
                             <Grid size={5}>
-                                {referencias.consolidado.toLocaleString('es-CO')}
+                                {referencias.consolidado.toLocaleString('es-CO') + ' por cliente'}
                             </Grid>
                         </Grid>
                         <hr />
