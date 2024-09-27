@@ -31,7 +31,7 @@ export const executeAthenaQuery = async (query) => {
                 throw new Error('La consulta falló o fue cancelada.');
             }
 
-            const waitTime = queryStatus === 'QUEUED' ? 500 : 500;
+            const waitTime = queryStatus === 'QUEUED' ? 3000 : 1000;
             await new Promise((resolve) => setTimeout(resolve, waitTime));
         }
 
