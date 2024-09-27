@@ -212,10 +212,10 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                     <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                                     <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
                                         <Grid size={4}>
-                                            <div>{ventaVolumenes.consolidado.ventas_un.toFixed(2).toLocaleString('es-CO') + ' U'}</div>
+                                            <div>{ventaVolumenes.consolidado.ventas_un.toLocaleString('es-CO') + ' U'}</div>
                                         </Grid>
                                         <Grid size={4}>
-                                            <div>{ventaVolumenes.consolidado.ventas_kg.toFixed(2).toLocaleString('es-CO') + ' Kg'}</div>
+                                            <div>{ventaVolumenes.consolidado.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
                                         </Grid>
                                         <Grid size={4}>
                                             <div>{'$' + ventaVolumenes.consolidado.ventas_eco.toLocaleString('es-CO')}</div>
@@ -233,10 +233,10 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                             <span><strong>{zona.zona}</strong></span>
                                             <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
                                                 <Grid size={4}>
-                                                    <div>{zona.ventas_un.toFixed(2).toLocaleString('es-CO') + ' U'}</div>
+                                                    <div>{zona.ventas_un.toLocaleString('es-CO') + ' U'}</div>
                                                 </Grid>
                                                 <Grid size={4}>
-                                                    <div>{zona.ventas_kg.toFixed(2).toLocaleString('es-CO') + ' Kg'}</div>
+                                                    <div>{zona.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
                                                 </Grid>
                                                 <Grid size={4}>
                                                     <div>{'$' + zona.ventas_eco.toLocaleString('es-CO')}</div>

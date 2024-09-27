@@ -446,20 +446,20 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0 0 7px' }}>
                                             {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
                                         </h4>
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Unidades</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_un.toFixed(2).toLocaleString('es-CO') + ' U'}</div>
+                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_un.toLocaleString('es-CO') + ' U'}</div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_kg.toFixed(2).toLocaleString('es-CO') + ' Kg'}</div>
+                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
@@ -587,8 +587,8 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0 0 7px' }}>
                                             {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
                                         </h4>
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={4}>
@@ -663,8 +663,8 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0 0 7px' }}>
                                             {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
                                         </h4>
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={6}>
@@ -733,8 +733,8 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0 0 7px' }}>
                                             {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Datos al mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Datos en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
+                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
+                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
                                         </h4>
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={6}>
