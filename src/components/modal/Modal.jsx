@@ -9,6 +9,8 @@ import Tab from '@mui/material/Tab';
 import './Modal.css';
 import { executeAthenaQuery } from '../../services/athenaService.js';
 
+const colores = ['#CDDE00', '#83D3C9', '#F9B242', '#66A59C', '#E3E935']
+
 //Para ordenar los meses 
 const monthOrder = {
     'Enero': 1, 'Febrero': 2, 'Marzo': 3, 'Abril': 4, 'Mayo': 5, 'Junio': 6, 'Julio': 7, 'Agosto': 8, 'Septiembre': 9, 'Octubre': 10, 'Noviembre': 11, 'Diciembre': 12
@@ -187,7 +189,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
 
     // Método para calcular la efectividad
     const calcularEfectividad = (planeadas, efectivas) => {
-        const valor = 1379;
+        const valor = 1379.111111;
         return efectivas.map(efectiva => {
             const plan = planeadas.find(planeada => planeada.mes === efectiva.mes && planeada.r_id_vendedor === efectiva.vendedor_ecom);
 
@@ -451,13 +453,13 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Unidades</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_un.toLocaleString('es-CO') + ' U'}</div>
+                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_un.toFixed(2).toLocaleString('es-CO') + ' U'}</div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
+                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_kg.toFixed(2).toLocaleString('es-CO') + ' Kg'}</div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
@@ -471,36 +473,41 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                 </Grid>
                                 <Grid size={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                        <h4 style={{ margin: '0' }}>Volumen de ventas mes a mes por vendedor</h4>
+                                        <h4 style={{ margin: '0' }}>Volumen de ventas mes a mes</h4>
 
-                                        <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
-                                            {/* {dataPieVolumen.map((item, index) => ( */}
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#CDDE00',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data real</span>
+                                        <div style={{
+                                            position: 'relative',
+                                            height: '100%',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}>
+                                            <div style={{
+                                                margin: '27px 0 10px',
+                                                display: 'flex',
+                                                gap: '35px',
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}>
+                                                {volumenesChart.ventas_un.map((item, index) => (
+                                                    <>
+                                                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                                                            <div style={{
+                                                                width: '20px',
+                                                                height: '2px',
+                                                                // borderRadius: '2px',
+                                                                backgroundColor: colores[index % colores.length],
+                                                                marginRight: '5px'
+                                                            }}></div>
+                                                            <span style={{
+                                                                fontSize: '14px'
+                                                            }}>{item.label}</span>
+                                                        </div>
+                                                    </>
+                                                ))}
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#F9B242',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data predictiva</span>
-                                            </div>
-                                            {/* ))} */}
                                         </div>
+
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <Grid size={4}>
@@ -510,6 +517,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={' unidades'}
                                                     marginLeft={70}
+                                                    marginTop={10}
                                                     translateX={-30}
                                                 />
                                             </Grid>
@@ -520,6 +528,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={' kilogramos'}
                                                     marginLeft={60}
+                                                    marginTop={10}
                                                     translateX={-20}
                                                 />
                                             </Grid>
@@ -529,8 +538,9 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     xLabels={volumenesChart.labels}
                                                     colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={'pesos'}
-                                                    marginLeft={100}
-                                                    translateX={-60}
+                                                    marginLeft={60}
+                                                    marginTop={10}
+                                                    translateX={-20}
                                                 />
                                             </Grid>
                                             {/* <>
@@ -609,7 +619,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0' }}>Efectividad de ventas mes a mes</h4>
 
-                                        <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
+                                        {/* <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                                                 <div style={{
                                                     width: '18px',
@@ -634,7 +644,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     fontSize: '14px'
                                                 }}>Data predictiva</span>
                                             </div>
-                                        </div>
+                                        </div> */}
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <StackedBarChart
@@ -677,9 +687,9 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
 
                                 <Grid size={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                        <h4 style={{ margin: '0' }}>Promedio de referencias vendidas por cliente mes a mes</h4>
+                                        <h4 style={{ margin: '0' }}>Promedio de referencias vendidas mes a mes</h4>
 
-                                        <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
+                                        {/* <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                                                 <div style={{
                                                     width: '18px',
@@ -704,7 +714,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     fontSize: '14px'
                                                 }}>Data predictiva</span>
                                             </div>
-                                        </div>
+                                        </div> */}
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <StackedBarChart
@@ -749,7 +759,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0' }}>Promedio ejecución presupuestal mes a mes</h4>
 
-                                        <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
+                                        {/* <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                                                 <div style={{
                                                     width: '18px',
@@ -774,7 +784,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                     fontSize: '14px'
                                                 }}>Data predictiva</span>
                                             </div>
-                                        </div>
+                                        </div> */}
 
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <StackedBarChart
@@ -795,8 +805,9 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                 </div> */}
 
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     )
 }
 
