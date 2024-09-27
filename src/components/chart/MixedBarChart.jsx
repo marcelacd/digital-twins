@@ -5,7 +5,7 @@ import { axisClasses } from '@mui/x-charts/ChartsAxis';
 
 const colores = ['#CDDE00', '#83D3C9', '#F9B242', '#66A59C', '#E3E935']
 
-function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40,  marginTop = 60,  translateX }) {
+function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, marginTop = 60, translateX }) {
     const sizing = translateX
         ? {
             // width: 250,
@@ -95,6 +95,10 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40,  mar
                     // }
                 }
             ]}
+            // axisHighlight={{
+            //     x: 'line', // Or 'none', or 'band'
+            //     y: 'line', // Or 'none'
+            // }}
             margin={{ top: marginTop, right: 15, bottom: 25, left: marginLeft }}
             slotProps={{
                 legend: {

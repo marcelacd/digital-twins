@@ -490,20 +490,18 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                 alignItems: 'center'
                                             }}>
                                                 {volumenesChart.ventas_un.map((item, index) => (
-                                                    <>
-                                                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                            <div style={{
-                                                                width: '20px',
-                                                                height: '2px',
-                                                                // borderRadius: '2px',
-                                                                backgroundColor: colores[index % colores.length],
-                                                                marginRight: '5px'
-                                                            }}></div>
-                                                            <span style={{
-                                                                fontSize: '14px'
-                                                            }}>{item.label}</span>
-                                                        </div>
-                                                    </>
+                                                    <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                                                        <div style={{
+                                                            width: '20px',
+                                                            height: '2px',
+                                                            // borderRadius: '2px',
+                                                            backgroundColor: colores[index % colores.length],
+                                                            marginRight: '5px'
+                                                        }}></div>
+                                                        <span style={{
+                                                            fontSize: '14px'
+                                                        }}>{item.label}</span>
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
