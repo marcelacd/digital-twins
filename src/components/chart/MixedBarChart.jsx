@@ -3,14 +3,20 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { legendClasses } from '@mui/x-charts/ChartsLegend';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 
-function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, translateX }) {
+const colores = ['#CDDE00', '#83D3C9', '#F9B242', '#66A59C', '#E3E935']
+
+function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40,  marginTop = 60,  translateX }) {
     const sizing = translateX
         ? {
-            // margin: { right: 5 },
             // width: 250,
-            height: 200,
+            height: 192,
             legend: { hidden: true },
-            yAxis: [{ label: tooltip }],
+            yAxis: [
+                {
+                    label: tooltip,
+                    valueFormatter: (value) => tooltip === 'pesos' ? `${(value / 1000000).toLocaleString()}M` : value,
+                }
+            ],
             sx: {
                 [`.${legendClasses.root}`]: {
                     transform: 'translate(20px, 0)',
@@ -21,8 +27,13 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, tran
             }
         }
         : {
-            height: 200,
-            legend: { hidden: true },
+            height: 250,
+            legend: { hidden: false },
+            yAxis: [
+                {
+                    valueFormatter: (value) => tooltip === '%' ? `${(value)}%` : value,
+                }
+            ],
             sx: {
                 [`.${legendClasses.root}`]: {
                     transform: 'translate(20px, 0)',
@@ -49,7 +60,6 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, tran
         return months.map(month => new Date(year, monthMap[month], 1))
     }
     const monthDates = convertMonthsToDates(xLabels, 2023)
-    const colores = ['#CDDE00', '#83D3C9', '#F9B242', '#66A59C', '#E3E935']
 
     return (
         <BarChart
@@ -61,17 +71,15 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, tran
                     if (valor) {
                         return tooltip === 'pesos'
                             ? `$${valor.toLocaleString('es-CO')}`
-                            : `${valor.toLocaleString('es-CO')}${tooltip}`
+                            : `${valor.toFixed(2).toLocaleString('es-CO')}${tooltip}`
                     } else {
                         return ''
                     }
                 },
                 label: dat.label,
                 id: `id-${index}`,
-                // color: colores[index],
                 color: colores[index % colores.length]
             }))}
-            // xAxis={[{ data: xLabels, scaleType: 'band' }]}
             xAxis={[
                 {
                     scaleType: 'band',
@@ -87,8 +95,19 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, tran
                     // }
                 }
             ]}
-            // tooltip={{ trigger: 'item' }}
-            margin={{ top: 10, right: 5, bottom: 25, left: marginLeft }}
+            margin={{ top: marginTop, right: 15, bottom: 25, left: marginLeft }}
+            slotProps={{
+                legend: {
+                    labelStyle: {
+                        fontSize: 14,
+                    },
+                    direction: 'row',
+                    itemMarkWidth: 20,
+                    itemMarkHeight: 2,
+                    markGap: 5,
+                    itemGap: 35,
+                }
+            }}
             {...sizing}
         />
     )
