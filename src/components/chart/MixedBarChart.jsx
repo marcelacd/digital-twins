@@ -70,9 +70,15 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, marg
                 valueFormatter: (valor, { dataIndex }) => {
                     if (valor) {
                         return (tooltip === 'pesos')
-                            ? `$${valor.toLocaleString('es-CO')}`
-                            : (tooltip || tooltip.trim() === 'unidades' || tooltip === 'kilogramos')
-                                ? `${valor.toLocaleString('es-CO')}${tooltip}`
+                            ? `$${valor.toLocaleString('es-CO', {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0,
+                            })}`
+                            : (tooltip.trim() === 'unidades' || tooltip === 'kilogramos')
+                                ? `${valor.toLocaleString('es-CO', {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
+                                })}${tooltip}`
                                 : `${valor.toFixed(2).toLocaleString('es-CO')}${tooltip}`
                     } else {
                         return ''

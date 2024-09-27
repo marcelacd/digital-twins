@@ -453,19 +453,28 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Unidades</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_un.toLocaleString('es-CO') + ' U'}</div>
+                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_un.toLocaleString('es-CO', {
+                                                        minimumFractionDigits: 0,
+                                                        maximumFractionDigits: 0,
+                                                    })}</div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
+                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_kg.toLocaleString('es-CO', {
+                                                        minimumFractionDigits: 0,
+                                                        maximumFractionDigits: 0,
+                                                    })}</div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Pesos</h4>
-                                                    <div style={{ fontSize: 20 }}>{'$' + ventaVolumenes.ventas_eco.toLocaleString('es-CO')}</div>
+                                                    <div style={{ fontSize: 20 }}>{'$' + ventaVolumenes.ventas_eco.toLocaleString('es-CO', {
+                                                        minimumFractionDigits: 0,
+                                                        maximumFractionDigits: 0,
+                                                    })}</div>
                                                 </div>
                                             </Grid>
                                         </Grid>
