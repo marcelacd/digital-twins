@@ -140,7 +140,7 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                     <DiscreteSlider handleChangeMeses={handleChangeMeses}></DiscreteSlider>
                 </div>
 
-                <Accordion className='accordion-box points' expanded={expanded === 'panel1'} onChange={handleChangeExpanded('panel1')}>
+                <Accordion className='accordion-box points' >
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         aria-controls="panel1bh-content"
@@ -212,13 +212,22 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                     <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                                     <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
                                         <Grid size={4}>
-                                            <div>{ventaVolumenes.consolidado.ventas_un.toLocaleString('es-CO') + ' U'}</div>
+                                            <div>{ventaVolumenes.consolidado.ventas_un.toLocaleString('es-CO', {
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0,
+                                            }) + ' Un'}</div>
                                         </Grid>
                                         <Grid size={4}>
-                                            <div>{ventaVolumenes.consolidado.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
+                                            <div>{ventaVolumenes.consolidado.ventas_kg.toLocaleString('es-CO', {
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0,
+                                            }) + ' Kg'}</div>
                                         </Grid>
                                         <Grid size={4}>
-                                            <div>{'$' + ventaVolumenes.consolidado.ventas_eco.toLocaleString('es-CO')}</div>
+                                            <div>{'$' + ventaVolumenes.consolidado.ventas_eco.toLocaleString('es-CO', {
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0,
+                                            })}</div>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -233,13 +242,22 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                             <span><strong>{zona.zona}</strong></span>
                                             <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
                                                 <Grid size={4}>
-                                                    <div>{zona.ventas_un.toLocaleString('es-CO') + ' U'}</div>
+                                                    <div>{zona.ventas_un.toLocaleString('es-CO', {
+                                                        minimumFractionDigits: 0,
+                                                        maximumFractionDigits: 0,
+                                                    }) + ' Un'}</div>
                                                 </Grid>
                                                 <Grid size={4}>
-                                                    <div>{zona.ventas_kg.toLocaleString('es-CO') + ' Kg'}</div>
+                                                    <div>{zona.ventas_kg.toLocaleString('es-CO', {
+                                                        minimumFractionDigits: 0,
+                                                        maximumFractionDigits: 0,
+                                                    }) + ' Kg'}</div>
                                                 </Grid>
                                                 <Grid size={4}>
-                                                    <div>{'$' + zona.ventas_eco.toLocaleString('es-CO')}</div>
+                                                    <div>{'$' + zona.ventas_eco.toLocaleString('es-CO', {
+                                                        minimumFractionDigits: 0,
+                                                        maximumFractionDigits: 0,
+                                                    })}</div>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
