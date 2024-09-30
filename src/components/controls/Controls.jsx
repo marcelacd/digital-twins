@@ -19,8 +19,10 @@ import Checkbox from '@mui/material/Checkbox';
 import InputSelect from '../input/InputSelect.jsx'
 import DiscreteSlider from '../input/Slider.jsx'
 import { alpha, styled } from '@mui/material/styles';
+import { COLOR_ZONAS } from '../../utils/constants.jsx';
+import { formatNumber } from '../../utils/functions.jsx';
 
-const colors = ['#F9B242', '#3BB6A7', '#CDDE00']
+// const colors = ['#F9B242', '#3BB6A7', '#CDDE00']
 
 const currencies = [
     {
@@ -140,7 +142,7 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                     <DiscreteSlider handleChangeMeses={handleChangeMeses}></DiscreteSlider>
                 </div>
 
-                <Accordion className='accordion-box points' >
+                <Accordion className='accordion-box points' defaultExpanded>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         aria-controls="panel1bh-content"
@@ -173,7 +175,7 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                         <Grid size={2}>
                                             <NavigationIcon
                                                 fontSize='small'
-                                                sx={{ cursor: 'pointer', color: colors[index] }}
+                                                sx={{ cursor: 'pointer', color: COLOR_ZONAS[index % COLOR_ZONAS.length] }}
                                                 onClick={() => handleSwitch({ target: { fly: `${zone.code}` } })}
                                             />
                                         </Grid>
@@ -212,22 +214,13 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                     <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                                     <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
                                         <Grid size={4}>
-                                            <div>{ventaVolumenes.consolidado.ventas_un.toLocaleString('es-CO', {
-                                                minimumFractionDigits: 0,
-                                                maximumFractionDigits: 0,
-                                            }) + ' Un'}</div>
+                                            <div>{formatNumber(ventaVolumenes.consolidado.ventas_un, { minimumFractionDigits: 0, maximumFractionDigits: 0 }, ' Un')}</div>
                                         </Grid>
                                         <Grid size={4}>
-                                            <div>{ventaVolumenes.consolidado.ventas_kg.toLocaleString('es-CO', {
-                                                minimumFractionDigits: 0,
-                                                maximumFractionDigits: 0,
-                                            }) + ' Kg'}</div>
+                                            <div>{formatNumber(ventaVolumenes.consolidado.ventas_kg, { minimumFractionDigits: 0, maximumFractionDigits: 0 }, ' Kg')}</div>
                                         </Grid>
                                         <Grid size={4}>
-                                            <div>{'$' + ventaVolumenes.consolidado.ventas_eco.toLocaleString('es-CO', {
-                                                minimumFractionDigits: 0,
-                                                maximumFractionDigits: 0,
-                                            })}</div>
+                                            <div>{'$' + formatNumber(ventaVolumenes.consolidado.ventas_eco, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -242,22 +235,13 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                             <span><strong>{zona.zona}</strong></span>
                                             <Grid container columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
                                                 <Grid size={4}>
-                                                    <div>{zona.ventas_un.toLocaleString('es-CO', {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0,
-                                                    }) + ' Un'}</div>
+                                                    <div>{formatNumber(zona.ventas_un, { minimumFractionDigits: 0, maximumFractionDigits: 0 }, ' Un')}</div>
                                                 </Grid>
                                                 <Grid size={4}>
-                                                    <div>{zona.ventas_kg.toLocaleString('es-CO', {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0,
-                                                    }) + ' Kg'}</div>
+                                                    <div>{formatNumber(zona.ventas_kg, { minimumFractionDigits: 0, maximumFractionDigits: 0 }, ' Kg')}</div>
                                                 </Grid>
                                                 <Grid size={4}>
-                                                    <div>{'$' + zona.ventas_eco.toLocaleString('es-CO', {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0,
-                                                    })}</div>
+                                                    <div>{'$' + formatNumber(zona.ventas_eco, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -285,7 +269,8 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                 <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
                             <Grid size={5}>
-                                <div>{`${efectividadVentas.consolidado.toFixed(2)}%`}</div>
+                                <div>{formatNumber(efectividadVentas.consolidado, {}, '%')}</div>
+                                {/* <div>{`${efectividadVentas.consolidado.toFixed(2)}%`}</div> */}
                             </Grid>
                         </Grid>
                         <hr />
@@ -297,7 +282,8 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
                                         <Grid size={5}>
-                                            <div>{`${zona.efectividad.toFixed(2)}%`}</div>
+                                            <div>{formatNumber(zona.efectividad, {}, '%')}</div>
+                                            {/* <div>{`${zona.efectividad.toFixed(2)}%`}</div> */}
                                         </Grid>
                                     </React.Fragment>
                                 ))
@@ -323,7 +309,8 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                 <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
                             <Grid size={5}>
-                                {referencias.consolidado.toFixed(2).toLocaleString('es-CO') + ' por cliente'}
+                                <div>{formatNumber(referencias.consolidado, {}, ' por cliente')}</div>
+                                {/* {referencias.consolidado.toFixed(2).toLocaleString('es-CO') + ' por cliente'} */}
                             </Grid>
                         </Grid>
                         <hr />
@@ -335,7 +322,8 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
                                         <Grid size={5}>
-                                            {zona.referencias_total.toFixed(2).toLocaleString('es-CO') + ' por cliente'}
+                                            <div>{formatNumber(zona.referencias_total, {}, ' por cliente')}</div>
+                                            {/* {zona.referencias_total.toFixed(2).toLocaleString('es-CO') + ' por cliente'} */}
                                         </Grid>
                                     </React.Fragment>
                                 ))
@@ -361,7 +349,8 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                 <span style={{ color: '#009877' }}><strong>Consolidado</strong></span>
                             </Grid>
                             <Grid size={5}>
-                                <div>{`${ejecucionPresupuestal.consolidado.toFixed(2)}%`}</div>
+                                <div>{formatNumber(ejecucionPresupuestal.consolidado, {}, '%')}</div>
+                                {/* <div>{`${ejecucionPresupuestal.consolidado.toFixed(2)}%`}</div> */}
                             </Grid>
                         </Grid>
                         <hr />
@@ -373,7 +362,8 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                                             <span><strong>{zona.zona}</strong></span>
                                         </Grid>
                                         <Grid size={5}>
-                                            <div>{`${zona.ejecucion_presupuestal.toFixed(2)}%`}</div>
+                                            <div>{formatNumber(zona.ejecucion_presupuestal, {}, '%')}</div>
+                                            {/* <div>{`${zona.ejecucion_presupuestal.toFixed(2)}%`}</div> */}
                                         </Grid>
                                     </React.Fragment>
                                 ))

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { StackedBarChart } from '../chart/MixedBarChart'
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid2';
 import CloseIcon from '@mui/icons-material/Close';
@@ -7,29 +6,11 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
 import './Modal.css';
+import { StackedBarChart } from '../chart/MixedBarChart'
 import { executeAthenaQuery } from '../../services/athenaService.js';
-
-const colores = ['#CDDE00', '#83D3C9', '#F9B242', '#66A59C', '#E3E935']
-
-//Para ordenar los meses 
-const monthOrder = {
-    'Enero': 1, 'Febrero': 2, 'Marzo': 3, 'Abril': 4, 'Mayo': 5, 'Junio': 6, 'Julio': 7, 'Agosto': 8, 'Septiembre': 9, 'Octubre': 10, 'Noviembre': 11, 'Diciembre': 12
-}
-
-const months = [
-    { value: 1, label: 'Enero' },
-    { value: 2, label: 'Febrero' },
-    { value: 3, label: 'Marzo' },
-    { value: 4, label: 'Abril' },
-    { value: 5, label: 'Mayo' },
-    { value: 6, label: 'Junio' },
-    { value: 7, label: 'Julio' },
-    { value: 8, label: 'Agosto' },
-    { value: 9, label: 'Septiembre' },
-    { value: 10, label: 'Octubre' },
-    { value: 11, label: 'Noviembre' },
-    { value: 12, label: 'Diciembre' },
-]
+import { convertirDataObjetos, formatNumber, ordenarData } from '../../utils/functions.jsx';
+import { COLOR_CHART } from '../../utils/constants.jsx';
+import ConsolidatedHeader from '../ConsolidatedHeader.jsx';
 
 function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMeses }) {
     const [isLoading, setIsLoading] = useState(true)
@@ -49,17 +30,15 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
         setValue(newValue)
     }
 
-    function transformarDataVolumenes(data) {
+    const transformarDataVolumenes = (data) => {
         const resultado = convertirDataObjetos(data, 'zona')
         setVentaVolumenes(resultado[0])
     }
-    function transformarDataVolumenesChart(data) {
+    const transformarDataVolumenesChart = (data) => {
         const resultado = convertirDataObjetos(data, 'mes')
 
         // Ordenar los objetos basados en el orden de los meses
-        const sortedResultado = resultado.sort((a, b) => {
-            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0)
-        })
+        const sortedResultado = ordenarData(resultado)
 
         const organizedData = {
             labels: [...new Set(sortedResultado.map(item => item.mes))],
@@ -70,17 +49,15 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
         setVolumenesChart(organizedData)
     }
 
-    function transformarDataEjePresupuestal(data) {
+    const transformarDataEjePresupuestal = (data) => {
         const resultado = convertirDataObjetos(data, 'zona')
         setEjecucionPresupuestal(resultado[0])
     }
-    function transformarDataEjePresupuestalChart(data) {
+    const transformarDataEjePresupuestalChart = (data) => {
         const resultado = convertirDataObjetos(data, 'mes')
 
         // Ordenar los objetos basados en el orden de los meses
-        const sortedResultado = resultado.sort((a, b) => {
-            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0);
-        })
+        const sortedResultado = ordenarData(resultado)
 
         const organizedData = {
             labels: [...new Set(sortedResultado.map(item => item.mes))],
@@ -89,21 +66,19 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
         setEjecucionPresupuestalChart(organizedData)
     }
 
-    function transformarDataReferencias(data) {
+    const transformarDataReferencias = (data) => {
         const resultado = convertirDataObjetos(data, 'zona')
         setReferencias(resultado[0])
     }
-    function transformarDataTotalClientes(data) {
+    const transformarDataTotalClientes = (data) => {
         const resultado = convertirDataObjetos(data, 'zona')
         setTotalClientes(resultado[0])
     }
-    function transformarDataReferenciasChart(data) {
+    const transformarDataReferenciasChart = (data) => {
         const resultado = convertirDataObjetos(data, 'mes')
 
         // Ordenar los objetos basados en el orden de los meses
-        const sortedResultado = resultado.sort((a, b) => {
-            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0)
-        })
+        const sortedResultado = ordenarData(resultado)
 
         const organizedData = {
             labels: [...new Set(sortedResultado.map(item => item.mes))],
@@ -112,7 +87,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
         setReferenciasChart(organizedData)
     }
 
-    function transformarDataEfectividad(vPlaneadas, vEfectivas) {
+    const transformarDataEfectividad = (vPlaneadas, vEfectivas) => {
         const ventasPlaneadas = parseFloat(vPlaneadas[1][1])
         const ventasEfectivas = parseFloat(vEfectivas[1][1])
 
@@ -124,40 +99,20 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
 
         setEfectividadVentas(organizedData)
     }
-    function transformarDataEfectividadChart(vPlaneadas, vEfectivas) {
+    const transformarDataEfectividadChart = (vPlaneadas, vEfectivas) => {
         const resultadoPlan = convertirDataObjetos(vPlaneadas, 'mes')
         const resultadoEfe = convertirDataObjetos(vEfectivas, 'mes')
 
         const promedioEfectividadVentas = calcularEfectividad(resultadoPlan, resultadoEfe)
 
         // Ordenar los objetos basados en el orden de los meses
-        const sortedResultado = promedioEfectividadVentas.sort((a, b) => {
-            return (monthOrder[a.mes] || 0) - (monthOrder[b.mes] || 0)
-        })
+        const sortedResultado = ordenarData(promedioEfectividadVentas)
 
         const organizedData = {
             labels: [...new Set(sortedResultado.map(item => item.mes))],
             data: formatearData(sortedResultado, 'efectividad'),
         }
         setEfectividadVentasChart(organizedData)
-    }
-
-    const convertirDataObjetos = (data, field) => {
-        // Convertir los datos en objetos
-        const resultado = data.slice(1).map(row => {
-            return data[0].reduce((obj, header, index) => {
-                const specialHeaders = [field, 'vendedor_ecom', 'r_id_vendedor']
-
-                if (specialHeaders.includes(header)) {
-                    obj[header] = row[index]
-                } else {
-                    obj[header] = parseFloat(row[index])
-                }
-
-                return obj
-            }, {})
-        })
-        return resultado
     }
 
     const formatearData = (data, field) => {
@@ -194,7 +149,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
             const plan = planeadas.find(planeada => planeada.mes === efectiva.mes && planeada.r_id_vendedor === efectiva.vendedor_ecom);
 
             const ventasPlaneadas = plan ? plan.ventas_planeadas_mensual : valor;
-            const efectividad = (efectiva.ventas_efectivas_mensual / ventasPlaneadas) * 100;
+            const efectividad = (efectiva.ventas_efectivas_mensual / ventasPlaneadas) * 100
 
             return {
                 mes: efectiva.mes,
@@ -202,11 +157,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                 efectividad: efectividad
             }
         })
-    }
-
-    function valuetext(value) {
-        const month = months.find(month => month.value === value)
-        return month ? month.label : ''
     }
 
     // Ejecuta la query cuando se abre el modal
@@ -222,7 +172,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                         FROM "digital-twins-nutresa-glue-db"."ventas" 
                                         WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' 
                                         GROUP BY zona`
-
                 const queryVolumenesChart = `SELECT mes, vendedor_ecom,
                                                 SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco,
                                                 SUM(venta_neta_acum_ano_actual_kg) AS ventas_kg,
@@ -244,8 +193,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                 //Ejecucion presupuestal
                 const queryEjePresupuestal = `SELECT zona, SUM(ppto_neta_acum_ano_actual_eco) AS ppto, SUM(venta_neta_acum_ano_actual_eco) AS ventas
                                               FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' GROUP BY zona;`
-                // const queryEjePresupuestalChart = `SELECT mes, (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
-                //                                    FROM "digital-twins-nutresa-glue-db"."ventas" WHERE zona = '${selectedZona}' GROUP BY mes`;
                 const queryEjePresupuestalChart = `SELECT mes, vendedor_ecom,
                                                         (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
                                                     FROM "digital-twins-nutresa-glue-db"."ventas"  
@@ -270,13 +217,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                             WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                             GROUP BY mes, zona, vendedor_ecom) AS clientes_por_vendedor
                                             WHERE mes IN (${selectMesesSQL}) AND zona = '${selectedZona}' GROUP BY zona;`
-                // const queryReferenciasChart = `SELECT mes, AVG(conteo_referencias) AS referencias_total
-                //                            FROM(SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
-                //                            FROM(SELECT DISTINCT mes, zona, descripcion_material, nombre_comercial, vendedor_ecom
-                //                            FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
-                //                            WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
-                //                            GROUP BY mes, zona, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor
-                //                                WHERE zona = '${selectedZona}' GROUP BY mes`
+
                 const queryReferenciasChart = `SELECT mes, vendedor_ecom, AVG(conteo_referencias) AS referencias_total
                                                 FROM (
                                                     SELECT mes, zona, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
@@ -311,16 +252,10 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                 FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
                                                 WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                                 WHERE zona = '${selectedZona}' AND mes IN (${selectMesesSQL}) GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY zona`
-                //Falta la data planeada para los meses de prediccion
+
                 const queryVentasPlaneadasChart = `SELECT mes, r_id_vendedor, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
                                               FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra"
                                               WHERE zona = '${selectedZona}' GROUP BY mes, r_id_vendedor`
-                // const queryVentasEfectivasChart = `SELECT mes, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
-                //                                 SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
-                //                                 FROM (SELECT DISTINCT mes, zona, semana, nombre_comercial, vendedor_ecom
-                //                                 FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."ventas"
-                //                                 WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
-                //                                 WHERE zona = '${selectedZona}' GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal GROUP BY mes`
                 const queryVentasEfectivasChart = `SELECT mes, vendedor_ecom, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual 
                                                     FROM (
                                                         SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
@@ -370,7 +305,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                     executeAthenaQuery(queryVentasPlaneadasChart),
                     executeAthenaQuery(queryVentasEfectivasChart),
                 ])
-
                 transformarDataVolumenes(respuestaVolumenes)
                 transformarDataVolumenesChart(respuestaVolumenChart)
                 transformarDataEjePresupuestal(respuestaEjePresupuestal)
@@ -398,13 +332,9 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
     return (
         <div className="modal-overlay" style={{ position: 'absolute' }}>
             {isLoading ? (
-                <>
-                    {/* <div>Predicting data</div> */}
-                    <span className="loader"></span>
-                </>
+                <span className="loader"></span>
             ) : (
                 <div className="modal-content">
-
                     <div style={{ position: 'relative' }}>
                         <CloseIcon fontSize='small'
                             onClick={onClose}
@@ -436,7 +366,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                 <Tab label="Efectividad" sx={{ '&.Mui-selected': { color: '#3bb6a7' } }} />
                                 <Tab label="Referencias" sx={{ '&.Mui-selected': { color: '#3bb6a7' } }} />
                                 <Tab label="Ejecución presupuestal" sx={{ '&.Mui-selected': { color: '#3bb6a7' } }} />
-                                {/* sx={{ textTransform: 'none' }} */}
                             </Tabs>
                         </Box>
 
@@ -444,37 +373,30 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
                                 <Grid size={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                        <h4 style={{ margin: '0 0 7px' }}>
-                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
-                                        </h4>
+                                        <ConsolidatedHeader selectedRangeMeses={selectedRangeMeses} />
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Unidades</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_un.toLocaleString('es-CO', {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0,
-                                                    })}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {formatNumber(ventaVolumenes.ventas_un, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Kilogramos</h4>
-                                                    <div style={{ fontSize: 20 }}>{ventaVolumenes.ventas_kg.toLocaleString('es-CO', {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0,
-                                                    })}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {formatNumber(ventaVolumenes.ventas_kg, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Pesos</h4>
-                                                    <div style={{ fontSize: 20 }}>{'$' + ventaVolumenes.ventas_eco.toLocaleString('es-CO', {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0,
-                                                    })}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {'$' + formatNumber(ventaVolumenes.ventas_eco, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                         </Grid>
@@ -504,7 +426,7 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                             width: '20px',
                                                             height: '2px',
                                                             // borderRadius: '2px',
-                                                            backgroundColor: colores[index % colores.length],
+                                                            backgroundColor: COLOR_CHART[index % COLOR_CHART.length],
                                                             marginRight: '5px'
                                                         }}></div>
                                                         <span style={{
@@ -515,13 +437,11 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                             </div>
                                         </div>
 
-
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <Grid size={4}>
                                                 <StackedBarChart
                                                     data={volumenesChart.ventas_un}
                                                     xLabels={volumenesChart.labels}
-                                                    colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={' unidades'}
                                                     marginLeft={70}
                                                     marginTop={10}
@@ -532,7 +452,6 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                 <StackedBarChart
                                                     data={volumenesChart.ventas_kg}
                                                     xLabels={volumenesChart.labels}
-                                                    colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={' kilogramos'}
                                                     marginLeft={60}
                                                     marginTop={10}
@@ -543,47 +462,12 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                                 <StackedBarChart
                                                     data={volumenesChart.ventas_eco}
                                                     xLabels={volumenesChart.labels}
-                                                    colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                     tooltip={'pesos'}
                                                     marginLeft={60}
                                                     marginTop={10}
                                                     translateX={-20}
                                                 />
                                             </Grid>
-                                            {/* <>
-                                                <Grid size={4}>
-                                                    <ColorScale
-                                                        data={volumenesChart.ventas_un}
-                                                        xLabels={volumenesChart.labels}
-                                                        colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
-                                                        tooltip={' unidades'}
-                                                        marginLeft={70}
-                                                        translateX={-30}
-                                                    ></ColorScale>
-                                                </Grid>
-
-                                                <Grid size={4}>
-                                                    <ColorScale
-                                                        data={volumenesChart.ventas_kg}
-                                                        xLabels={volumenesChart.labels}
-                                                        colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
-                                                        tooltip={' kilogramos'}
-                                                        marginLeft={60}
-                                                        translateX={-20}
-                                                    ></ColorScale>
-                                                </Grid>
-
-                                                <Grid size={4}>
-                                                    <ColorScale
-                                                        data={volumenesChart.ventas_eco}
-                                                        xLabels={volumenesChart.labels}
-                                                        colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
-                                                        tooltip={'pesos'}
-                                                        marginLeft={100}
-                                                        translateX={-60}
-                                                    ></ColorScale>
-                                                </Grid>
-                                            </> */}
                                         </Grid>
                                     </div>
                                 </Grid>
@@ -594,28 +478,30 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
                                 <Grid size={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                        <h4 style={{ margin: '0 0 7px' }}>
-                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
-                                        </h4>
+                                        <ConsolidatedHeader selectedRangeMeses={selectedRangeMeses} />
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Visitas programadas</h4>
-                                                    <div style={{ fontSize: 20 }}>{efectividadVentas.ventas_planeadas.toLocaleString('es-CO')}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {formatNumber(efectividadVentas.ventas_planeadas, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Visitas efectivas</h4>
-                                                    <div style={{ fontSize: 20 }}>{efectividadVentas.ventas_efectivas.toLocaleString('es-CO')}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {formatNumber(efectividadVentas.ventas_efectivas, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                             <Grid size={4}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Visitas no efectivas</h4>
-                                                    <div style={{ fontSize: 20 }}>{efectividadVentas.ventas_no_efectivas.toLocaleString('es-CO')}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {formatNumber(efectividadVentas.ventas_no_efectivas, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                         </Grid>
@@ -626,38 +512,10 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0' }}>Efectividad de ventas mes a mes</h4>
 
-                                        {/* <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#CDDE00',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data real</span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#F9B242',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data predictiva</span>
-                                            </div>
-                                        </div> */}
-
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <StackedBarChart
                                                 data={efectividadVentasChart.data}
                                                 xLabels={efectividadVentasChart.labels}
-                                                colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                 tooltip={'%'}
                                             />
                                         </Grid>
@@ -670,22 +528,23 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
                                 <Grid size={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                        <h4 style={{ margin: '0 0 7px' }}>
-                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
-                                        </h4>
+                                        <ConsolidatedHeader selectedRangeMeses={selectedRangeMeses} />
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={6}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Total referencias</h4>
-                                                    <div style={{ fontSize: 20 }}>{referencias.referencias_total.toLocaleString('es-CO')}</div>
+
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {formatNumber(referencias.referencias_total, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                             <Grid size={6}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Total de clientes</h4>
-                                                    <div style={{ fontSize: 20 }}>{totalClientes.total_clientes.toLocaleString('es-CO')}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {formatNumber(totalClientes.total_clientes, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                         </Grid>
@@ -696,38 +555,10 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0' }}>Promedio de referencias vendidas mes a mes</h4>
 
-                                        {/* <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#CDDE00',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data real</span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#F9B242',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data predictiva</span>
-                                            </div>
-                                        </div> */}
-
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <StackedBarChart
                                                 data={referenciasChart.data}
                                                 xLabels={referenciasChart.labels}
-                                                colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                 tooltip={' por cliente'}
                                             />
                                         </Grid>
@@ -740,22 +571,22 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                             <Grid container rowSpacing={1.5} columnSpacing={{ xs: 1, sm: 1.5, md: 1.5 }} sx={{ width: '100%' }}>
                                 <Grid size={12}>
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
-                                        <h4 style={{ margin: '0 0 7px' }}>
-                                            {valuetext(selectedRangeMeses[0]) === valuetext(selectedRangeMeses[1])
-                                                ? `Consolidado del mes de ${valuetext(selectedRangeMeses[0])}`
-                                                : `Consolidado en el rango ${valuetext(selectedRangeMeses[0])} - ${valuetext(selectedRangeMeses[1])}`}
-                                        </h4>
+                                        <ConsolidatedHeader selectedRangeMeses={selectedRangeMeses} />
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 2 }}>
                                             <Grid size={6}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Presupuesto total</h4>
-                                                    <div style={{ fontSize: 20 }}>{'$' + ejecucionPresupuestal.ppto.toLocaleString('es-CO')}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {'$' + formatNumber(ejecucionPresupuestal.ppto, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                             <Grid size={6}>
                                                 <div className='cart'>
                                                     <h4 style={{ margin: '0' }}>Ventas totales</h4>
-                                                    <div style={{ fontSize: 20 }}>{'$' + ejecucionPresupuestal.ventas.toLocaleString('es-CO')}</div>
+                                                    <div style={{ fontSize: 20 }}>
+                                                        {'$' + formatNumber(ejecucionPresupuestal.ventas, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                                    </div>
                                                 </div>
                                             </Grid>
                                         </Grid>
@@ -766,38 +597,10 @@ function Modal({ isOpen, onClose, selectedZona, selectMesesSQL, selectedRangeMes
                                     <div style={{ backgroundColor: '#F6F6F6', padding: '10px', borderRadius: '6px' }}>
                                         <h4 style={{ margin: '0' }}>Promedio ejecución presupuestal mes a mes</h4>
 
-                                        {/* <div style={{ margin: '10px', display: 'flex', gap: '30px', justifyContent: 'center' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#CDDE00',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data real</span>
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                                                <div style={{
-                                                    width: '18px',
-                                                    height: '3px',
-                                                    borderRadius: '2px',
-                                                    backgroundColor: '#F9B242',
-                                                    marginRight: '10px'
-                                                }}></div>
-                                                <span style={{
-                                                    fontSize: '14px'
-                                                }}>Data predictiva</span>
-                                            </div>
-                                        </div> */}
-
                                         <Grid container columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                                             <StackedBarChart
                                                 data={ejecucionPresupuestalChart.data}
                                                 xLabels={ejecucionPresupuestalChart.labels}
-                                                colors={{ ventas: '#CDDE00', prediccion: '#F9B242' }}
                                                 tooltip={'%'}
                                             />
                                         </Grid>

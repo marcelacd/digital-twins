@@ -56,7 +56,7 @@ export default function RangeSlider({ handleChangeMeses }) {
 
     return (
         <>
-            <Box sx={{ width: 300 }}>
+            <Box sx={{ width: '90%' }}>
                 <Slider
                     value={selectedRange}
                     onChange={handleChange}

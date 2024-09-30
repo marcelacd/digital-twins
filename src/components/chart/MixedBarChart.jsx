@@ -3,9 +3,11 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { legendClasses } from '@mui/x-charts/ChartsLegend';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 
-const colores = ['#CDDE00', '#83D3C9', '#F9B242', '#66A59C', '#E3E935']
+import { COLOR_CHART } from '../../utils/constants';
+import { formatNumber } from '../../utils/functions';
 
-function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, marginTop = 60, translateX }) {
+
+function StackedBarChart({ data, xLabels, tooltip, marginLeft = 40, marginTop = 60, translateX }) {
     const sizing = translateX
         ? {
             // width: 250,
@@ -41,26 +43,6 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, marg
             },
         }
 
-    const monthMap = {
-        Enero: 0,
-        Febrero: 1,
-        Marzo: 2,
-        Abril: 3,
-        Mayo: 4,
-        Junio: 5,
-        Julio: 6,
-        Agosto: 7,
-        Septiembre: 8,
-        Octubre: 9,
-        Noviembre: 10,
-        Diciembre: 11,
-    }
-
-    const convertMonthsToDates = (months, year) => {
-        return months.map(month => new Date(year, monthMap[month], 1))
-    }
-    const monthDates = convertMonthsToDates(xLabels, 2023)
-
     return (
         <BarChart
             grid={{ horizontal: true }}
@@ -70,43 +52,24 @@ function StackedBarChart({ data, xLabels, colors, tooltip, marginLeft = 40, marg
                 valueFormatter: (valor, { dataIndex }) => {
                     if (valor) {
                         return (tooltip === 'pesos')
-                            ? `$${valor.toLocaleString('es-CO', {
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0,
-                            })}`
-                            : (tooltip.trim() === 'unidades' || tooltip === 'kilogramos')
-                                ? `${valor.toLocaleString('es-CO', {
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0,
-                                })}${tooltip}`
-                                : `${valor.toFixed(2).toLocaleString('es-CO')}${tooltip}`
+                            ? `$${formatNumber(valor, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                            : (tooltip.trim() === 'unidades' || tooltip.trim() === 'kilogramos')
+                                ? `${formatNumber(valor, { minimumFractionDigits: 0, maximumFractionDigits: 0 }, tooltip)}`
+                                : `${formatNumber(valor, {}, tooltip)}`
                     } else {
                         return ''
                     }
                 },
                 label: dat.label,
                 id: `id-${index}`,
-                color: colores[index % colores.length]
+                color: COLOR_CHART[index % COLOR_CHART.length]
             }))}
             xAxis={[
                 {
                     scaleType: 'band',
-                    data: monthDates,
-                    valueFormatter: (value, context) => {
-                        const month = value.toLocaleString('default', { month: 'long' })
-                        return month.charAt(0).toUpperCase() + month.slice(1)
-                    },
-                    // colorMap: {
-                    //     type: 'piecewise',
-                    //     thresholds: [new Date(2023, 6, 1)],
-                    //     colors: [colors.ventas, colors.prediccion],
-                    // }
+                    data: xLabels,
                 }
             ]}
-            // axisHighlight={{
-            //     x: 'line', // Or 'none', or 'band'
-            //     y: 'line', // Or 'none'
-            // }}
             margin={{ top: marginTop, right: 15, bottom: 25, left: marginLeft }}
             slotProps={{
                 legend: {

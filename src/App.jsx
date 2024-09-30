@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+import './App.css';
+
 import Controls from './components/controls/Controls';
 import Form from './components/form/Form';
 import Modal from './components/modal/Modal';
-import './App.css';
 import { executeAthenaQuery } from './services/athenaService.js';
-
-const colors = ['#F9B242', '#3BB6A7', '#CDDE00']
+import { COLOR_ZONAS } from './utils/constants.jsx';
+import { calculateCentroid, convertirDataObjetos, sortCoordinatesByAngle, transformarDataClientes } from './utils/functions.jsx';
 
 const App = () => {
   // const [isLoading, setIsLoading] = useState(true)
@@ -26,7 +28,7 @@ const App = () => {
   const closeModal = () => setModalOpen(false)
 
   const changeMeses = ({ fullRange, newValue }) => {
-    const mesesSQL = fullRange.map(mes => `'${mes}'`).join(', ');
+    const mesesSQL = fullRange.map(mes => `'${mes}'`).join(', ')
     setSelectMesesSQL(mesesSQL)
     setSelectedRangeMeses(newValue)
   }
@@ -35,45 +37,7 @@ const App = () => {
     setUncheckedZones(zonas)
   }
 
-  // function calculateCentro(coordinates) {
-  //   const latitudes = []
-  //   const longitudes = []
-
-  //   coordinates.map(a => {
-  //     latitudes.push(a[0])
-  //     longitudes.push(a[1])
-  //   })
-
-  //   const centro_mapa = [
-  //     (Math.min(...latitudes) + Math.max(...latitudes)) / 2,
-  //     (Math.min(...longitudes) + Math.max(...longitudes)) / 2
-  //   ]
-  //   return centro_mapa
-  // }
-
-  function calculateCentroid(coordinates) {
-    let xSum = 0, ySum = 0
-
-    coordinates.forEach(([y, x]) => {
-      xSum += x
-      ySum += y
-    })
-
-    const centerX = xSum / coordinates.length
-    const centerY = ySum / coordinates.length
-
-    return [centerY, centerX]
-  }
-  function sortCoordinatesByAngle(coordinates) {
-    const centroid = calculateCentroid(coordinates);
-
-    return coordinates.sort((a, b) => {
-      const angleA = Math.atan2(a[0] - centroid[0], a[1] - centroid[1])
-      const angleB = Math.atan2(b[0] - centroid[0], b[1] - centroid[1])
-      return angleA - angleB;
-    })
-  }
-  function transformarDataZonas(zonas, clientes) {
+  const transformarDataZonas = (zonas, clientes) => {
     const result = []
     const zoneMap = {}
 
@@ -87,23 +51,19 @@ const App = () => {
       }
 
       // Añadimos las coordenadas a la zona correspondiente
-      zoneMap[zone].push([parseFloat(coord_y), parseFloat(coord_x)]);
+      zoneMap[zone].push([parseFloat(coord_y), parseFloat(coord_x)])
     }
 
     Object.keys(zoneMap).forEach((zone, index) => {
       const centroZona = calculateCentroid(zoneMap[zone])
       const sortedCoordinates = sortCoordinatesByAngle(zoneMap[zone])
-      // const calculate = calculateCentro(zoneMap[zone])
 
       result.push({
         code: zone,
         height: `200`,
-        color: colors[index],
-
+        color: COLOR_ZONAS[index % COLOR_ZONAS.length],
         // height: `${index + 1}00`,
         flyLocation: {
-          // lon: calculate[1],
-          // lat: calculate[0],
           lon: [centroZona[1]],
           lat: [centroZona[0]],
           height: 6000,
@@ -119,31 +79,14 @@ const App = () => {
 
     return result
   }
-  function transformarDataClientes(clientes) {
-    const zoneMap = {};
 
-    // Iteramos por las filas (omitimos la primera que contiene los encabezados)
-    for (let i = 1; i < clientes.length; i++) {
-      const [zone, cv_barrio, coord_y, coord_x] = clientes[i];
-
-      // Si la zona no existe en el mapa, la creamos con un array vacío de coordenadas
-      if (!zoneMap[zone]) {
-        zoneMap[zone] = [];
-      }
-
-      // Añadimos las coordenadas a la zona correspondiente
-      zoneMap[zone].push([parseFloat(coord_y), parseFloat(coord_x), cv_barrio]);
-    }
-    return zoneMap
-  }
-
-  function transformarDataVolumenes(data) {
+  const transformarDataVolumenes = (data) => {
     const resultado = convertirDataObjetos(data, 'zona')
 
     const consolidado = resultado.reduce((acumulador, item) => {
-      acumulador.ventas_kg += item.ventas_kg;
-      acumulador.ventas_un += item.ventas_un;
-      acumulador.ventas_eco += item.ventas_eco;
+      acumulador.ventas_kg += item.ventas_kg
+      acumulador.ventas_un += item.ventas_un
+      acumulador.ventas_eco += item.ventas_eco
       return acumulador;
     }, {
       ventas_kg: 0,
@@ -151,12 +94,10 @@ const App = () => {
       ventas_eco: 0,
     })
 
-    setVentaVolumenes({
-      data: resultado,
-      consolidado
-    })
+    setVentaVolumenes({ data: resultado, consolidado })
   }
-  function transformarDataReferencias(data) {
+
+  const transformarDataReferencias = (data) => {
     const resultado = convertirDataObjetos(data, 'zona')
 
     const consolidado = resultado.reduce((acumulador, item) => {
@@ -171,7 +112,8 @@ const App = () => {
       consolidado: consolidado.referencias_total / resultado.length
     })
   }
-  function transformarDataEjecucionPresupuestal(data) {
+
+  const transformarDataEjecucionPresupuestal = (data) => {
     const resultado = convertirDataObjetos(data, 'zona')
 
     const consolidado = resultado.reduce((acumulador, item) => {
@@ -189,7 +131,8 @@ const App = () => {
       consolidado: promedioEjecucion
     })
   }
-  function transformarDataVentasPlanEfec(vPlaneadas, vEfectivas) {
+
+  const transformarDataEfectividad = (vPlaneadas, vEfectivas) => {
     const resultadoPlan = convertirDataObjetos(vPlaneadas, 'zona')
     const resultadoEfe = convertirDataObjetos(vEfectivas, 'zona')
 
@@ -207,14 +150,14 @@ const App = () => {
 
     //Consolidaddo de efectividad
     const consolidado = efectividadVentas.reduce((acumulador, item) => {
-      acumulador.efectividad_total += item.efectividad;
-      acumulador.efectividad_count += 1;
+      acumulador.efectividad_total += item.efectividad
+      acumulador.efectividad_count += 1
       return acumulador;
     }, {
       efectividad_total: 0,
       efectividad_count: 0
     })
-    const promedioEfectividad = consolidado.efectividad_total / consolidado.efectividad_count;
+    const promedioEfectividad = consolidado.efectividad_total / consolidado.efectividad_count
 
     setEfectividadVentas({
       data: efectividadVentas,
@@ -222,19 +165,7 @@ const App = () => {
     })
   }
 
-  const convertirDataObjetos = (data, field) => {
-    // Convertir los datos en objetos
-    const resultado = data.slice(1).map(row => {
-      return data[0].reduce((obj, header, index) => {
-        obj[header] = header === field ? row[index] : parseFloat(row[index])
-        return obj
-      }, {})
-    })
-
-    return resultado
-  }
-
-  function ajustarConsulta(queryBase) {
+  const ajustarQuery = (queryBase) => {
     if (uncheckedZones.length > 0) {
       queryBase += ` AND zona NOT IN (${uncheckedZones.map(zona => `'${zona}'`).join(', ')})`
     }
@@ -250,11 +181,11 @@ const App = () => {
         openModal()
       }
     }
-    window.addEventListener('message', handleMessage);
+    window.addEventListener('message', handleMessage)
     // Cleanup function para eliminar el listener al desmontar el componente
     return () => {
-      window.removeEventListener('message', handleMessage);
-    };
+      window.removeEventListener('message', handleMessage)
+    }
   }, [])
 
   // useEffect para cargar la data por primera vez
@@ -294,7 +225,7 @@ const App = () => {
         console.error('Error fetching data:', error);
       }
     }
-    fetchData();
+    fetchData()
   }, []) // Ejecutar solo una vez al cargar el componente
 
   useEffect(() => {
@@ -306,7 +237,7 @@ const App = () => {
                               SUM(venta_neta_acum_ano_actual_eco) AS ventas_eco
                               FROM "digital-twins-nutresa-glue-db"."ventas"
                               WHERE mes IN (${selectMesesSQL})`
-        queryVolumenes = ajustarConsulta(queryVolumenes)
+        queryVolumenes = ajustarQuery(queryVolumenes)
 
         let queryReferencias = `SELECT zona, AVG(conteo_referencias) AS referencias_total FROM (
                                   SELECT zona, mes, vendedor_ecom, nombre_comercial, COUNT(descripcion_material) AS conteo_referencias
@@ -315,15 +246,15 @@ const App = () => {
                                   WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                   GROUP BY zona, mes, vendedor_ecom, nombre_comercial) AS referencias_por_cliente_vendedor 
                                   WHERE mes  IN (${selectMesesSQL})`
-        queryReferencias = ajustarConsulta(queryReferencias)
+        queryReferencias = ajustarQuery(queryReferencias)
 
         let queryEjePresupuestal = `SELECT zona, (SUM(venta_neta_acum_ano_actual_eco) / SUM(ppto_neta_acum_ano_actual_eco)) * 100 AS ejecucion_presupuestal
                                             FROM "digital-twins-nutresa-glue-db"."ventas" WHERE mes IN (${selectMesesSQL})`
-        queryEjePresupuestal = ajustarConsulta(queryEjePresupuestal)
+        queryEjePresupuestal = ajustarQuery(queryEjePresupuestal)
 
         let queryVentasPlaneadas = `SELECT zona, COUNT(cv_nombre_completo_cliente) * 4 AS ventas_planeadas_mensual
                                       FROM "AwsDataCatalog"."digital-twins-nutresa-glue-db"."maestra" WHERE mes IN (${selectMesesSQL})`
-        queryVentasPlaneadas = ajustarConsulta(queryVentasPlaneadas)
+        queryVentasPlaneadas = ajustarQuery(queryVentasPlaneadas)
 
         let queryVentasEfectivas = `SELECT zona, SUM(ventas_efectivas_semanal) AS ventas_efectivas_mensual FROM (
                                       SELECT mes, zona, vendedor_ecom, COUNT(nombre_comercial) AS ventas_efectivas_semanal
@@ -332,7 +263,7 @@ const App = () => {
                                       WHERE venta_neta_acum_ano_actual_eco > 0) AS ventas_distintivas
                                       GROUP BY mes, zona, vendedor_ecom) AS ventas_semanal
                                       WHERE mes IN (${selectMesesSQL})`
-        queryVentasEfectivas = ajustarConsulta(queryVentasEfectivas)
+        queryVentasEfectivas = ajustarQuery(queryVentasEfectivas)
 
         const [
           respuestaVolumenes,
@@ -351,7 +282,7 @@ const App = () => {
         transformarDataVolumenes(respuestaVolumenes)
         transformarDataReferencias(respuestaReferencias)
         transformarDataEjecucionPresupuestal(respuestaEjePresupuestal)
-        transformarDataVentasPlanEfec(respuestaVentasPlaneadas, respuestaVentasEfectivas)
+        transformarDataEfectividad(respuestaVentasPlaneadas, respuestaVentasEfectivas)
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -366,9 +297,9 @@ const App = () => {
       iframeRef.current.contentWindow.postMessage({
         codeCity: 'BG',
         value: dataCiudad['BG'],
-      }, '*');
+      }, '*')
     }
-  }, [dataCiudad]);
+  }, [dataCiudad])
 
   // Enviar mensajes a cesio iframe
   const sendMessageToIframe = (message) => {
