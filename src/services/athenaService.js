@@ -10,11 +10,11 @@ export const executeAthenaQuery = async (query) => {
         // Iniciar la consulta en Athena
         const startQueryCommand = new StartQueryExecutionCommand({
             QueryString: query,
-            QueryExecutionContext: { Database: 'digital-twins-nutresa-glue-db' },
+            QueryExecutionContext: { Database: process.env.REACT_APP_DATABASE_NAME },
             ResultConfiguration: {
-                OutputLocation: 's3://digital-twins-nutresa-s3/metadata/',
+                OutputLocation: process.env.REACT_APP_S3_OUTPUT_LOCATION,
             },
-        });
+        })
 
         const queryExecution = await client.send(startQueryCommand);
         const queryExecutionId = queryExecution.QueryExecutionId;
