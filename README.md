@@ -1,70 +1,62 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Comenzando con Create React App
 
-## Available Scripts
+Este proyecto fue inicializado con [Create React App](https://github.com/facebook/create-react-app).
 
-In the project directory, you can run:
+## Scripts Disponibles
+
+En el directorio del proyecto, puedes ejecutar:
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Ejecuta la aplicación en modo de desarrollo. Abre [http://localhost:3000](http://localhost:3000) para verla en tu navegador.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+La página se recargará cuando realices cambios. También puedes ver los errores de lint en la consola.
 
-### `npm test`
+## Construcción y despliegue en AWS ECR
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+A continuación, se describen los pasos para construir la imagen Docker de la aplicación y cargarla en un repositorio de AWS ECR.
 
-### `npm run build`
+### 1. Autenticarse en el ECR
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Autentica tu CLI de Docker en tu repositorio de Amazon ECR. Reemplaza `<aws-region>` por la región de tu cuenta (por ejemplo, `us-east-1`).
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+aws ecr get-login-password --region <aws-region> | docker login --username AWS --password-stdin <aws-account-id>.dkr.ecr.<aws-region>.amazonaws.com
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 2. Construir la imagen Docker
 
-### `npm run eject`
+Construye la imagen Docker de la aplicación React en el directorio del proyecto. Reemplaza `my-react-app` con el nombre que quieras darle a la imagen.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+docker build -t my-react-app .
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 3. Etiquetar la imagen
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Etiqueta la imagen de Docker para que apunte al repositorio ECR. Reemplaza `<aws-region>` y `<aws-account-id>` por los valores correspondientes.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+docker tag my-react-app:latest <aws-account-id>.dkr.ecr.<aws-region>.amazonaws.com/my-react-app:latest
+```
 
-## Learn More
+### 4. Crear un repositorio en ECR (si no existe)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Si aún no tienes un repositorio en ECR, puedes crearlo con el siguiente comando:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+aws ecr create-repository --repository-name my-react-app --region <aws-region>
+```
 
-### Code Splitting
+### 5. Subir la imagen a ECR
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Sube la imagen al repositorio de ECR:
 
-### Analyzing the Bundle Size
+```bash
+docker push <aws-account-id>.dkr.ecr.<aws-region>.amazonaws.com/my-react-app:latest
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 6. Despliegue
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Una vez que la imagen esté en ECR, puedes usarla para desplegar tu aplicación en un servicio de AWS como ECS, EKS o App Runner.

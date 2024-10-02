@@ -1,6 +1,6 @@
 const enviarDatos = async (data) => {
     try {
-        const response = await fetch('https://f7b68k2bu5.execute-api.us-east-1.amazonaws.com/Stage1', {
+        const response = await fetch(process.env.REACT_APP_API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
