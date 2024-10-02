@@ -5,6 +5,16 @@ Este proyecto fue inicializado con [Create React App](https://github.com/faceboo
 
 ## Scripts Disponibles
 
+El proyecto necesita las siguientes variables de entorno en el archivo .env:
+
+`REACT_APP_AWS_REGION`
+`REACT_APP_AWS_ACCESS_KEY_ID`
+`REACT_APP_AWS_SECRET_ACCESS_KEY`
+`REACT_APP_AWS_SESSION_TOKEN`
+`REACT_APP_S3_OUTPUT_LOCATION`
+`REACT_APP_DATABASE_NAME`
+`REACT_APP_API_URL`
+
 En el directorio del proyecto, puedes ejecutar:
 
 ### `npm start`
