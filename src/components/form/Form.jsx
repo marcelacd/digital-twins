@@ -41,7 +41,7 @@ function Form() {
 
             Swal.fire({
                 icon: "success",
-                text: "Parametro enviado correctamente!!",
+                text: "Parametro enviado correctamente!",
             })
             // console.log('Datos enviados exitosamente:', response)
         }

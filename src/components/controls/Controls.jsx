@@ -142,6 +142,16 @@ function Controls({ sendMessageToIframe, dataCiudad, ventaVolumenes, ejecucionPr
                     <DiscreteSlider handleChangeMeses={handleChangeMeses}></DiscreteSlider>
                 </div>
 
+                <div style={{ margin: 20, display: 'flex' }}>
+                    <FormControlLabel
+                        control={<ColorSwitch
+                            onChange={handleSwitch}
+                            id={`route`}
+                            size="small" />}
+                        label="Pintar ruta"
+                    />
+                </div>
+
                 <Accordion className='accordion-box points' defaultExpanded>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}

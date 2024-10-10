@@ -1,3 +1,5 @@
+import route from './route.js'
+
 Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzMWQ0NjcwZi1mYTY2LTRhYzEtOWM1NS0wOTc4YjA3MjM3ZjIiLCJpZCI6MTczMzQ5LCJpYXQiOjE2OTgwNTE5NzJ9.y-PuQVtDcv_MxaYk-k0IL0oiWX0Dwk4KNywLq73UiFQ';
 
 // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
@@ -53,6 +55,11 @@ window.addEventListener('message', (event) => {
             }
             if (zone.idClient === data.type) {
                 addClients(zone.client, data.type)
+            }
+
+            if (data.type === 'route') {
+                // flyToLocation(-74.08547802374729, 4.644720875926402, 4103.410016846939, 16.97362996344888, -69.91311512876537, "", 8)
+                drawRute(route, 'route');
             }
         })
     }
@@ -132,16 +139,17 @@ try {
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
 
     // Controlador de la acción de hacer clic con el botón derecho
-    // const points = [];
-    // handler.setInputAction(function (click) {
-    //     var cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
-    //     if (cartesian) {
-    //         var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-    //         var longitude = Cesium.Math.toDegrees(cartographic.longitude);
-    //         var latitude = Cesium.Math.toDegrees(cartographic.latitude);
-    //         points.push([latitude, longitude])
-    //     }
-    // }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+    const points = [];
+    handler.setInputAction(function (click) {
+        var cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
+        if (cartesian) {
+            var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+            var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+            var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+            console.log(longitude, latitude)
+            points.push([latitude, longitude])
+        }
+    }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
     // Controlador de la acción de mover el ratón
     handler.setInputAction(function (movement) {
@@ -277,6 +285,7 @@ const addClients = (clients, type) => {
 // Eliminar entidades por tipo
 const removeEntities = (type) => {
     const entitiesToRemove = []
+
     viewer.entities.values.forEach(entity => {
         if (entity.name === type) {
             entitiesToRemove.push(entity)
@@ -300,6 +309,32 @@ viewer.camera.moveStart.addEventListener(function () {
     const pitch = Cesium.Math.toDegrees(viewer.camera.pitch);
     // console.log(longitude, latitude, height, heading, pitch);
 })
+
+// Draw routes from geojson
+function drawRute(data, name) {
+    if (data) {
+        data.features.map(feature => {
+            const route = [];
+            feature.geometry.coordinates.map(coord => {
+                const [lon, lat] = coord;
+                route.push(Cesium.Cartographic.fromDegrees(lon, lat));
+            })
+            var routePositions = Cesium.Ellipsoid.WGS84.cartographicArrayToCartesianArray(route);
+            Cesium.sampleTerrain(viewer.terrainProvider, 15, routePositions).then(function () {
+                viewer.entities.add({
+                    name: name,
+                    polyline: {
+                        positions: routePositions,
+                        width: 6,
+                        material: Cesium.Color.RED,
+                        clampToGround: true,
+                    },
+                });
+            });
+        })
+    }
+
+}
 
 // //Pintar todas las zonas
 // const addPolygonos = () => {
@@ -325,6 +360,7 @@ viewer.camera.moveStart.addEventListener(function () {
 //         })
 //     })
 // }
+
 
 
 
